@@ -6,6 +6,7 @@ shiro:
       enable: true
       url: "/ws/yiyi"
   plugin-list:
+    - com.bot.yiyi.plugin.RegisterPlugin
     - com.bot.yiyi.plugin.CrazyPlugin
     - com.bot.yiyi.plugin.MoneyPlugin
     - com.bot.yiyi.plugin.WifePlugin
