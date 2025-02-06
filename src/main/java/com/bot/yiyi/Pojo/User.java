@@ -16,4 +16,5 @@ public class User {
     private int money;
     private LocalDate lastCheckTime;
     private int bank;
+    private String lotteryTime;
 }

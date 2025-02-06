@@ -3,15 +3,52 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.bot.yiyi.mapper.MoneyMapper">
     <insert id="insertUser">
-        insert into user values (#{userId},0,null)
+        insert into user values (#{userId},0,null,0,null)
     </insert>
     <insert id="updateMoney">
         update user set money = #{money} where id = #{userId}
     </insert>
+    <insert id="addGroupUser">
+        insert into group_info values (0,#{userId},#{groupId})
+    </insert>
     <update id="checkIn">
         update user set money = money + #{money}, last_check_time = #{today} where id = #{userId}
     </update>
+    <update id="updateLotteryTime">
+        update user set lottery_time = #{lotteryTime} where id = #{userId}
+    </update>
+    <update id="deductionMoney">
+        update user set money = money - #{money} where id = #{userId}
+    </update>
+    <update id="addMoney">
+        update user set money = money + #{money} where id = #{userId}
+    </update>
+    <update id="storage">
+        update user set bank = bank + #{money}, money = money - #{money} where id = #{userId}
+    </update>
+    <update id="withdrawal">
+        update user set money = money + #{money}, bank = bank - #{money} where id = #{userId}
+    </update>
     <select id="selectUser" resultType="com.bot.yiyi.Pojo.User">
-        select id, money, last_check_time as lastCheckTime from user where id = #{userId}
+        select id, money, last_check_time as lastCheckTime, bank, lottery_time as lotteryTime from user where id = #{userId}
+    </select>
+    <select id="selectMAX" resultType="com.bot.yiyi.Pojo.User">
+        <![CDATA[select id, money + bank as money from user where money + bank > 0 order by money + bank desc limit 10]]>
+    </select>
+    <select id="selectMIN" resultType="com.bot.yiyi.Pojo.User">
+        <![CDATA[select id, money + bank as money from user where money + bank < 0 order by money + bank asc limit 10]]>
+    </select>
+    <select id="selectGroupIsHave" resultType="java.lang.Integer">
+        select id from group_info where user_id = #{userId} and group_id = #{groupId}
+    </select>
+    <select id="selectGroupMAX" resultType="com.bot.yiyi.Pojo.User">
+        <![CDATA[select u.id, u.money + u.bank as money from user u
+                join group_info g on u.id = g.user_id and g.group_id = #{groupId}
+                where u.money + u.bank > 0 order by u.money + u.bank desc limit 10]]>
+    </select>
+    <select id="selectGroupMIN" resultType="com.bot.yiyi.Pojo.User">
+        <![CDATA[select u.id, u.money + u.bank as money from user u
+                join group_info g on u.id = g.user_id and g.group_id = #{groupId}
+                where u.money + u.bank < 0 order by u.money + u.bank asc limit 10]]>
     </select>
 </mapper>
