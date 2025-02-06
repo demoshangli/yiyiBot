@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Random;
 
 @Component
@@ -25,7 +26,7 @@ public class WifePlugin extends BotPlugin{
             List<GroupMemberInfoResp> memberList = bot.getGroupMemberList(event.getGroupId()).getData();
             Random random = new Random();
             GroupMemberInfoResp wifeInfo = memberList.get(random.nextInt(memberList.size()));
-            if (wifeInfo.getUserId() == event.getUserId())
+            if (Objects.equals(wifeInfo.getUserId(), event.getUserId()))
                 wifeInfo = memberList.get(random.nextInt(memberList.size()));
             String msg = MsgUtils.builder().at(event.getUserId()).text("恭喜你，成功娶到了").at(wifeInfo.getUserId())
                     .img(OneBotMedia.builder().file("https://q1.qlogo.cn/g?b=qq&nk=" + wifeInfo.getUserId() + "&s=640"))
