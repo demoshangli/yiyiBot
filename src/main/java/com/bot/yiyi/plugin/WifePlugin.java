@@ -31,6 +31,7 @@ public class WifePlugin extends BotPlugin{
                     .img(OneBotMedia.builder().file("https://q1.qlogo.cn/g?b=qq&nk=" + wifeInfo.getUserId() + "&s=640"))
                     .text("记得好好珍惜她哦。").build();
             bot.sendGroupMsg(event.getGroupId(), msg, false);
+            return MESSAGE_IGNORE;
         }
         return MESSAGE_IGNORE;
     }

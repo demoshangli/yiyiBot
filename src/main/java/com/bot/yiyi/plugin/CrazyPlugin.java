@@ -43,6 +43,7 @@ public class CrazyPlugin extends BotPlugin {
             msgList.add(crazy);
             msgList.add(img);
             bot.sendGroupForwardMsg(event.getGroupId(), AtUtil.toForward(data.getNickname(), data.getUserId(), msgList));
+            return MESSAGE_IGNORE;
         }
         if (event.getMessage().contains("发电") || event.getMessage().contains("发癫") || event.getMessage().contains("爱你")) {
             List<Long> qqList = AtUtil.extractQQs(event.getMessage());
@@ -56,6 +57,7 @@ public class CrazyPlugin extends BotPlugin {
                 msgList.add(crazy);
                 msgList.add(img);
                 bot.sendGroupForwardMsg(event.getGroupId(), AtUtil.toForward(strangerInfo.getNickname(), event.getUserId(), msgList));
+                return MESSAGE_IGNORE;
             } else if (qqList.size() == 2) {
                 StrangerInfoResp toStrangerInfo = bot.getStrangerInfo(qqList.get(1), false).getData();
                 StrangerInfoResp fromStrangerInfo = bot.getStrangerInfo(qqList.get(0), false).getData();
@@ -64,9 +66,11 @@ public class CrazyPlugin extends BotPlugin {
                 msgList.add(crazy);
                 msgList.add(img);
                 bot.sendGroupForwardMsg(event.getGroupId(), AtUtil.toForward(fromStrangerInfo.getNickname(), fromStrangerInfo.getUserId(), msgList));
+                return MESSAGE_IGNORE;
             } else {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("你还想要多少？渣男！").build();
-                    bot.sendGroupMsg(event.getGroupId(), msg, false);
+                bot.sendGroupMsg(event.getGroupId(), msg, false);
+                return MESSAGE_IGNORE;
             }
         }
         // 返回 MESSAGE_IGNORE 执行 plugin-list 下一个插件，返回 MESSAGE_BLOCK 则不执行下一个插件
