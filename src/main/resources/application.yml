@@ -1,0 +1,20 @@
+server:
+  port: 8082
+shiro:
+  ws:
+    server:
+      enable: true
+      url: "/ws/yiyi"
+  plugin-list:
+    - com.bot.yiyi.plugin.CrazyPlugin
+    - com.bot.yiyi.plugin.MoneyPlugin
+    - com.bot.yiyi.plugin.WifePlugin
+spring:
+  datasource:
+    url: jdbc:mysql://192.144.232.42:3306/bot?useUnicode=true&characterEncoding=utf-8
+    username: root
+    password: wanan9644
+    driver-class-name: com.mysql.cj.jdbc.Driver
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.bot.yiyi.pojo
