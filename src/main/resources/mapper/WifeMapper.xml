@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bot.yiyi.mapper.WifeMapper">
+
+    <insert id="marry">
+        insert into wife_list values (0,#{userId},#{wife},0,0,now())
+    </insert>
+    <delete id="deleteWife">
+        delete from wife_list where husband = #{userId} or wife = #{userId}
+    </delete>
+    <select id="isWife" resultType="java.lang.String">
+        select husband from wife_list where wife = #{userId}
+    </select>
+    <select id="isHusband" resultType="java.lang.String">
+        select wife from wife_list where husband = #{userId}
+    </select>
+    <select id="selectWife" resultType="com.bot.yiyi.Pojo.Wife">
+        select id,husband,wife,wife_favor_ability as wifeFavorAbility,husband_favor_ability as husbandFavorAbility,marry_time as marryTime from wife_list where husband = #{userId}
+    </select>
+    <select id="selectHusband" resultType="com.bot.yiyi.Pojo.Wife">
+        select id,husband,wife,wife_favor_ability as wifeFavorAbility,husband_favor_ability as husbandFavorAbility,marry_time as marryTime from wife_list where wife = #{userId}
+    </select>
+    <select id="SelectConfession" resultType="java.lang.String">
+        select text from confession_list where id = #{id}
+    </select>
+</mapper>
