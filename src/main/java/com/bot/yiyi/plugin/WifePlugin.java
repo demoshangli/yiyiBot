@@ -327,13 +327,14 @@ public class WifePlugin extends BotPlugin {
         pattern = Pattern.compile("\\[CQ:at,qq=(\\d+)] 抢老婆|\\[CQ:at,qq=(\\d+)]抢老婆|抢老婆\\[CQ:at,qq=(\\d+)]");
         matcher = pattern.matcher(event.getMessage());
         if (matcher.matches()) {
-            if (!isMarry(bot, event, true)) {
+            if (isMarry(bot, event, true)) {
                 return MESSAGE_IGNORE;
             }
             User user = moneyMapper.selectUser(event.getUserId());
             if (user.getMoney() < 100) {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("你积分不够了!你只有" + user.getMoney() + "积分!攒够100积分再来吧!").build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
+                return MESSAGE_IGNORE;
             }
             String qq = matcher.group(1);
             if (qq == null) qq = matcher.group(2);
@@ -341,7 +342,7 @@ public class WifePlugin extends BotPlugin {
             Wife wife = wifeMapper.selectHusband(Long.valueOf(qq));
             Random random = new Random();
             double randomProbability = random.nextDouble() * 100;
-            int money = random.nextInt(100);
+            int money = random.nextInt(50) + 50;
             if (wife != null) {
                 double wifeProbability = 50 - (double) wife.getWifeFavorAbility() / 100;
                 if (randomProbability <= wifeProbability) {
@@ -384,13 +385,14 @@ public class WifePlugin extends BotPlugin {
         pattern = Pattern.compile("\\[CQ:at,qq=(\\d+)] 抢老公|\\[CQ:at,qq=(\\d+)]抢老公|抢老公\\[CQ:at,qq=(\\d+)]");
         matcher = pattern.matcher(event.getMessage());
         if (matcher.matches()) {
-            if (!isMarry(bot, event, true)) {
+            if (isMarry(bot, event, true)) {
                 return MESSAGE_IGNORE;
             }
             User user = moneyMapper.selectUser(event.getUserId());
             if (user.getMoney() < 100) {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("你积分不够了!你只有" + user.getMoney() + "积分!攒够100积分再来吧!").build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
+                return MESSAGE_IGNORE;
             }
             String qq = matcher.group(1);
             if (qq == null) qq = matcher.group(2);
@@ -398,7 +400,7 @@ public class WifePlugin extends BotPlugin {
             Wife wife = wifeMapper.selectHusband(Long.valueOf(qq));
             Random random = new Random();
             double randomProbability = random.nextDouble() * 100;
-            int money = random.nextInt(100);
+            int money = random.nextInt(50) + 50;
             if (wife != null) {
                 double wifeProbability = 50 - (double) wife.getWifeFavorAbility() / 100;
                 if (randomProbability <= wifeProbability) {
