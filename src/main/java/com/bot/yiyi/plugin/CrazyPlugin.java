@@ -35,7 +35,7 @@ public class CrazyPlugin extends BotPlugin {
     public int onGroupMessage(Bot bot, GroupMessageEvent event) {
         System.out.println(event.getMessage());
         LoginInfoResp data = bot.getLoginInfo().getData();
-        StrangerInfoResp strangerInfo = bot.getStrangerInfo(event.getUserId(), false).getData();
+        StrangerInfoResp strangerInfo = bot.getStrangerInfo(event.getUserId(), true).getData();
         List<String> msgList = new ArrayList<>();
         if (AtUtil.onlyAt(data, event)) {
             String crazy = HttpPostExample.crazy().replaceAll("745689", strangerInfo.getNickname());
@@ -51,7 +51,7 @@ public class CrazyPlugin extends BotPlugin {
                 return MESSAGE_IGNORE;
             }
             if (qqList.size() == 1) {
-                StrangerInfoResp toStrangerInfo = bot.getStrangerInfo(qqList.get(0), false).getData();
+                StrangerInfoResp toStrangerInfo = bot.getStrangerInfo(qqList.get(0), true).getData();
                 String crazy = HttpPostExample.crazy().replaceAll("745689", toStrangerInfo.getNickname());
                 String img = MsgUtils.builder().img(OneBotMedia.builder().file("https://q1.qlogo.cn/g?b=qq&nk=" + qqList.get(0) + "&s=640").summary("快来操死我")).build();
                 msgList.add(crazy);
@@ -59,8 +59,8 @@ public class CrazyPlugin extends BotPlugin {
                 bot.sendGroupForwardMsg(event.getGroupId(), AtUtil.toForward(strangerInfo.getNickname(), event.getUserId(), msgList));
                 return MESSAGE_IGNORE;
             } else if (qqList.size() == 2) {
-                StrangerInfoResp toStrangerInfo = bot.getStrangerInfo(qqList.get(1), false).getData();
-                StrangerInfoResp fromStrangerInfo = bot.getStrangerInfo(qqList.get(0), false).getData();
+                StrangerInfoResp toStrangerInfo = bot.getStrangerInfo(qqList.get(1), true).getData();
+                StrangerInfoResp fromStrangerInfo = bot.getStrangerInfo(qqList.get(0), true).getData();
                 String crazy = HttpPostExample.crazy().replaceAll("745689", toStrangerInfo.getNickname());
                 String img = MsgUtils.builder().img(OneBotMedia.builder().file("https://q1.qlogo.cn/g?b=qq&nk=" + qqList.get(1) + "&s=640").summary("快来操死我")).build();
                 msgList.add(crazy);

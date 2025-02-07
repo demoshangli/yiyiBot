@@ -12,11 +12,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class RegisterPlugin extends BotPlugin {
 
+    public static String atBot;
+
     @Autowired
     private MoneyMapper moneyMapper;
 
     @Override
     public int onAnyMessage(Bot bot, AnyMessageEvent event) {
+        atBot = "[CQ:at,qq=" + bot.getSelfId() + "]";
         User user = moneyMapper.selectUser(event.getUserId());
         if (user == null) {
             moneyMapper.insertUser(event.getUserId());

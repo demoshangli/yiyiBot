@@ -10,12 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.bot.yiyi.plugin.RegisterPlugin.atBot;
 import static com.bot.yiyi.utils.OperationUtils.luckyDraw;
 
 @Component
@@ -30,7 +29,8 @@ public class MoneyPlugin extends BotPlugin {
         User user = moneyMapper.selectUser(event.getUserId());
         Random random = new Random();
         LocalDate today = LocalDate.now();
-        if (event.getMessage().equals("打卡") || event.getMessage().equals("签到") || event.getMessage().equals("[CQ:at,qq=" + bot.getSelfId() + "]" + " 打卡") || event.getMessage().equals("[CQ:at,qq=" + bot.getSelfId() + "]" + " 签到")) {
+        Set<String> moneySet = new HashSet<>(Arrays.asList("打卡", "签到", atBot + "打卡", atBot + "签到"));
+        if (moneySet.contains(event.getMessage())) {
             if (user.getLastCheckTime() != null && user.getLastCheckTime().equals(today)) {
                 String message = MsgUtils.builder().at(event.getUserId()).text("今天已经打卡过了!").build();
                 bot.sendGroupMsg(event.getGroupId(), message, false);
@@ -42,12 +42,14 @@ public class MoneyPlugin extends BotPlugin {
             bot.sendGroupMsg(event.getGroupId(), message, false);
             return MESSAGE_IGNORE;
         }
-        if(event.getMessage().contains("我的积分") || event.getMessage().equals("积分")) {
+        moneySet = new HashSet<>(Arrays.asList("我的积分", "积分", atBot + "我的积分", atBot + "积分"));
+        if(moneySet.contains(event.getMessage())) {
             String message = MsgUtils.builder().at(event.getUserId()).text("你当前的积分为:" + user.getMoney() + "\n你银行中的积分为:" + user.getBank()).build();
             bot.sendGroupMsg(event.getGroupId(), message, false);
             return MESSAGE_IGNORE;
         }
-        if(event.getMessage().contains("积分抽奖") || event.getMessage().contains("积分赌狗")) {
+        moneySet = new HashSet<>(Arrays.asList("积分抽奖", "积分赌狗", atBot + "积分抽奖", atBot + "积分赌狗"));
+        if(moneySet.contains(event.getMessage())) {
             if (user.getLotteryTime() != null && !user.getLotteryTime().isEmpty()) {
                 String[] time = user.getLotteryTime().split(":");
                 if (time[0].equals(String.valueOf(today)) && time[1].equals("11111")) {
@@ -74,7 +76,8 @@ public class MoneyPlugin extends BotPlugin {
             bot.sendGroupMsg(event.getGroupId(), message, false);
             return MESSAGE_IGNORE;
         }
-        if (event.getMessage().equals("富豪榜") || event.getMessage().equals("[CQ:at,qq=" + bot.getSelfId() + "]" + " 富豪榜")) {
+        moneySet = new HashSet<>(Arrays.asList("富豪榜", atBot + "富豪榜"));
+        if (moneySet.contains(event.getMessage())) {
             List<User> userList = moneyMapper.selectMAX();
             StringBuilder list = new StringBuilder("富豪榜");
             int i = 1;
@@ -86,7 +89,8 @@ public class MoneyPlugin extends BotPlugin {
             bot.sendGroupMsg(event.getGroupId(), list.toString(), false);
             return MESSAGE_IGNORE;
         }
-        if (event.getMessage().equals("负豪榜") || event.getMessage().equals("[CQ:at,qq=" + bot.getSelfId() + "]" + " 负豪榜")) {
+        moneySet = new HashSet<>(Arrays.asList("负豪榜", atBot + "负豪榜"));
+        if (moneySet.contains(event.getMessage())) {
             List<User> userList = moneyMapper.selectMIN();
             StringBuilder list = new StringBuilder("负豪榜");
             int i = 1;
@@ -98,7 +102,8 @@ public class MoneyPlugin extends BotPlugin {
             bot.sendGroupMsg(event.getGroupId(), list.toString(), false);
             return MESSAGE_IGNORE;
         }
-        if (event.getMessage().equals("群富豪榜") || event.getMessage().equals("[CQ:at,qq=" + bot.getSelfId() + "]" + " 群富豪榜")) {
+        moneySet = new HashSet<>(Arrays.asList("群富豪榜", atBot + "群富豪榜"));
+        if (moneySet.contains(event.getMessage())) {
             List<User> userList = moneyMapper.selectGroupMAX(event.getGroupId());
             StringBuilder list = new StringBuilder("富豪榜");
             int i = 1;
@@ -110,7 +115,8 @@ public class MoneyPlugin extends BotPlugin {
             bot.sendGroupMsg(event.getGroupId(), list.toString(), false);
             return MESSAGE_IGNORE;
         }
-        if (event.getMessage().equals("群负豪榜") || event.getMessage().equals("[CQ:at,qq=" + bot.getSelfId() + "]" + " 群负豪榜")) {
+        moneySet = new HashSet<>(Arrays.asList("群负豪榜", atBot + "群负豪榜"));
+        if (moneySet.contains(event.getMessage())) {
             List<User> userList = moneyMapper.selectGroupMIN(event.getGroupId());
             StringBuilder list = new StringBuilder("负豪榜");
             int i = 1;
