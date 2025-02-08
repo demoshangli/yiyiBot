@@ -1,5 +1,6 @@
 package com.bot.yiyi.plugin;
 
+import com.bot.yiyi.Pojo.ReturnType;
 import com.bot.yiyi.Pojo.User;
 import com.bot.yiyi.Pojo.Wife;
 import com.bot.yiyi.mapper.MoneyMapper;
@@ -39,12 +40,12 @@ public class WifePlugin extends BotPlugin {
         Set<String> marrySet = new HashSet<>(Arrays.asList("娶群友", "娶老婆", atBot + "娶群友", atBot + "娶老婆"));
         if (marrySet.contains(event.getMessage())) {
             if (isMarry(bot, event, true)) {
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
             List<GroupMemberInfoResp> memberList = bot.getGroupMemberList(event.getGroupId()).getData();
             if (memberList.size() <= 1) {
                 bot.sendGroupMsg(event.getGroupId(),"群内成员太少，无法匹配。", false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
             Random random = new Random();
             GroupMemberInfoResp wifeInfo = memberList.get(random.nextInt(memberList.size()));
@@ -55,12 +56,12 @@ public class WifePlugin extends BotPlugin {
                     .img(OneBotMedia.builder().file("https://q1.qlogo.cn/g?b=qq&nk=" + wifeInfo.getUserId() + "&s=640"))
                     .text("记得好好珍惜她哦。").build();
             bot.sendGroupMsg(event.getGroupId(), msg, false);
-            return MESSAGE_IGNORE;
+            return ReturnType.IGNORE_FALSE();
         }
         marrySet = new HashSet<>(Arrays.asList("嫁群友", "嫁老公", atBot + "嫁群友", atBot + "嫁老公"));
         if (marrySet.contains(event.getMessage())) {
             if (isMarry(bot, event, true)) {
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
             List<GroupMemberInfoResp> memberList = bot.getGroupMemberList(event.getGroupId()).getData();
             Random random = new Random();
@@ -72,26 +73,24 @@ public class WifePlugin extends BotPlugin {
                     .img(OneBotMedia.builder().file("https://q1.qlogo.cn/g?b=qq&nk=" + wifeInfo.getUserId() + "&s=640"))
                     .text("记得好好珍惜他哦。").build();
             bot.sendGroupMsg(event.getGroupId(), msg, false);
-            return MESSAGE_IGNORE;
+            return ReturnType.IGNORE_FALSE();
         }
         Pattern pattern = Pattern.compile("娶\\[CQ:at,qq=(\\d+)]|\\[CQ:at,qq=(\\d+)]娶|\\[CQ:at,qq=(\\d+)] 娶");
         Matcher matcher = pattern.matcher(event.getMessage());
         if (matcher.matches()) {
             if (isMarry(bot, event, true)) {
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
-            String qq = matcher.group(1);
-            if (qq == null) qq = matcher.group(2);
-            if (qq == null) qq = matcher.group(3);
+            String qq = matcher.group(1) != null ? matcher.group(1) : matcher.group(2) != null ? matcher.group(2) : matcher.group(3);
             if (isMarry(bot, GroupMessageEvent.builder().userId(Long.parseLong(qq)).groupId(event.getGroupId()).build(), false)) {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("人家已经有伴侣了！还是换一个人吧！").build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
             if (redisTemplate.hasKey(event.getUserId() + "+" + qq)) {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("你已经和她求婚了,快@她来处理吧。").build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
             StrangerInfoResp wifeInfo = bot.getStrangerInfo(Long.parseLong(qq), true).getData();
             Random random = new Random();
@@ -108,20 +107,18 @@ public class WifePlugin extends BotPlugin {
         matcher = pattern.matcher(event.getMessage());
         if (matcher.matches()) {
             if (isMarry(bot, event, true)) {
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
-            String qq = matcher.group(1);
-            if (qq == null) qq = matcher.group(2);
-            if (qq == null) qq = matcher.group(3);
+            String qq = matcher.group(1) != null ? matcher.group(1) : matcher.group(2) != null ? matcher.group(2) : matcher.group(3);
             if (isMarry(bot, GroupMessageEvent.builder().userId(Long.parseLong(qq)).groupId(event.getGroupId()).build(), false)) {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("人家已经有伴侣了！还是换一个人吧！").build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
             if (redisTemplate.hasKey(event.getUserId() + "+" + qq)) {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("你已经和他求婚了,快@他来处理吧。").build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
             StrangerInfoResp wifeInfo = bot.getStrangerInfo(Long.parseLong(qq), true).getData();
             Random random = new Random();
@@ -138,18 +135,16 @@ public class WifePlugin extends BotPlugin {
         matcher = pattern.matcher(event.getMessage());
         if (matcher.matches()) {
             if (isMarry(bot, event, true)) {
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
             if (redisTemplate.hasKey("join"+ event.getUserId())) {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("你还没出狱呢！" + redisTemplate.getExpire("join"+ event.getUserId(), TimeUnit.SECONDS) + "秒后再来吧。").build();
             }
-            String qq = matcher.group(1);
-            if (qq == null) qq = matcher.group(2);
-            if (qq == null) qq = matcher.group(3);
+            String qq = matcher.group(1) != null ? matcher.group(1) : matcher.group(2) != null ? matcher.group(2) : matcher.group(3);
             if (isMarry(bot, GroupMessageEvent.builder().userId(Long.parseLong(qq)).groupId(event.getGroupId()).build(), false)) {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("人家已经有伴侣了！还是换一个人吧！").build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
             Random random = new Random();
             int num = random.nextInt(1000) + 1;
@@ -159,31 +154,29 @@ public class WifePlugin extends BotPlugin {
                         .at(Long.parseLong(qq)).text("已经成为你的老婆了!")
                         .img(OneBotMedia.builder().file("https://q1.qlogo.cn/g?b=qq&nk=" + qq + "&s=640")).build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             } else {
                 int time = random.nextInt(300) + 300;
                 redisTemplate.opsForValue().set("join"+ event.getUserId(), 1, time, TimeUnit.SECONDS);
                 String msg = MsgUtils.builder().at(event.getUserId()).text("很遗憾,你没能娶到她。\n她报警，你被关进大牢" + time + "秒。").build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
         }
         pattern = Pattern.compile("硬嫁\\[CQ:at,qq=(\\d+)]|\\[CQ:at,qq=(\\d+)]硬嫁|\\[CQ:at,qq=(\\d+)] 硬嫁");
         matcher = pattern.matcher(event.getMessage());
         if (matcher.matches()) {
             if (isMarry(bot, event, true)) {
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
             if (redisTemplate.hasKey("join"+ event.getUserId())) {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("你还没出狱呢！" + redisTemplate.getExpire("join"+ event.getUserId(), TimeUnit.SECONDS) + "秒后再来吧。").build();
             }
-            String qq = matcher.group(1);
-            if (qq == null) qq = matcher.group(2);
-            if (qq == null) qq = matcher.group(3);
+            String qq = matcher.group(1) != null ? matcher.group(1) : matcher.group(2) != null ? matcher.group(2) : matcher.group(3);
             if (isMarry(bot, GroupMessageEvent.builder().userId(Long.parseLong(qq)).groupId(event.getGroupId()).build(), false)) {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("人家已经有伴侣了！还是换一个人吧！").build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
             Random random = new Random();
             int num = random.nextInt(1000) + 1;
@@ -193,24 +186,23 @@ public class WifePlugin extends BotPlugin {
                         .at(Long.parseLong(qq)).text("已经成为你的老公了!")
                         .img(OneBotMedia.builder().file("https://q1.qlogo.cn/g?b=qq&nk=" + qq + "&s=640")).build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             } else {
                 int time = random.nextInt(300) + 300;
                 redisTemplate.opsForValue().set("join"+ event.getUserId(), 1, time, TimeUnit.SECONDS);
                 String msg = MsgUtils.builder().at(event.getUserId()).text("很遗憾,你没能嫁给他。\n他报警，你被关进大牢" + time + "秒。").build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
         }
         pattern = Pattern.compile("\\[CQ:at,qq=(\\d+)] 我愿意|\\[CQ:at,qq=(\\d+)]我愿意");
         matcher = pattern.matcher(event.getMessage());
         if (matcher.matches()) {
-            String qq = matcher.group(1);
-            if (qq == null) qq = matcher.group(2);
+            String qq = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
             if (!redisTemplate.hasKey(qq + "+" + event.getUserId())) {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("对方还没有和你求婚呢。").build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
             if ((int) redisTemplate.opsForValue().get(qq + "+" + event.getUserId()) == 0) {
                 wifeMapper.marry(event.getUserId(), Long.parseLong(qq));
@@ -226,12 +218,11 @@ public class WifePlugin extends BotPlugin {
         pattern = Pattern.compile("\\[CQ:at,qq=(\\d+)] 我拒绝|\\[CQ:at,qq=(\\d+)]我拒绝");
         matcher = pattern.matcher(event.getMessage());
         if (matcher.matches()) {
-            String qq = matcher.group(1);
-            if (qq == null) qq = matcher.group(2);
+            String qq = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
             if (!redisTemplate.hasKey(qq + "+" + event.getUserId())) {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("对方还没有和你求婚呢。").build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
             String msg = MsgUtils.builder().at(Long.parseLong(qq)).text("对方拒绝了你的求婚，天涯何处无芳草，何必单恋一支花。").build();
             bot.sendGroupMsg(event.getGroupId(), msg, false);
@@ -254,7 +245,7 @@ public class WifePlugin extends BotPlugin {
                         .text("她被抢走的概率为" + wifeProbability + "%。\n")
                         .text("你被抢走的概率为" + husbandProbability + "%。").build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             } else {
                 wife = wifeMapper.selectHusband(event.getUserId());
                 if (wife != null) {
@@ -275,7 +266,7 @@ public class WifePlugin extends BotPlugin {
                     String msg = MsgUtils.builder().at(event.getUserId()).text("醒醒!你既没有老公也没有老婆!").build();
                     bot.sendGroupMsg(event.getGroupId(), msg, false);
                 }
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
         }
         marrySet = new HashSet<>(Arrays.asList("我的老公", atBot + "我的老公"));
@@ -295,7 +286,7 @@ public class WifePlugin extends BotPlugin {
                         .text("他被抢走的概率为" + husbandProbability + "%。\n")
                         .text("你被抢走的概率为" + wifeProbability + "%。").build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             } else {
                 wife = wifeMapper.selectWife(event.getUserId());
                 if (wife != null) {
@@ -316,29 +307,27 @@ public class WifePlugin extends BotPlugin {
                     String msg = MsgUtils.builder().at(event.getUserId()).text("醒醒!你既没有老公也没有老婆!").build();
                     bot.sendGroupMsg(event.getGroupId(), msg, false);
                 }
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
         }
         if (event.getMessage().contains("抢群友")) {
             String msg = MsgUtils.builder().at(event.getUserId()).text("你想做男还是做女。用抢老婆或者抢老公吧。").build();
             bot.sendGroupMsg(event.getGroupId(), msg, false);
-            return MESSAGE_IGNORE;
+            return ReturnType.IGNORE_FALSE();
         }
         pattern = Pattern.compile("\\[CQ:at,qq=(\\d+)] 抢老婆|\\[CQ:at,qq=(\\d+)]抢老婆|抢老婆\\[CQ:at,qq=(\\d+)]");
         matcher = pattern.matcher(event.getMessage());
         if (matcher.matches()) {
             if (isMarry(bot, event, true)) {
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
             User user = moneyMapper.selectUser(event.getUserId());
             if (user.getMoney() < 100) {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("你积分不够了!你只有" + user.getMoney() + "积分!攒够100积分再来吧!").build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
-            String qq = matcher.group(1);
-            if (qq == null) qq = matcher.group(2);
-            if (qq == null) qq = matcher.group(3);
+            String qq = matcher.group(1) != null ? matcher.group(1) : matcher.group(2) != null ? matcher.group(2) : matcher.group(3);
             Wife wife = wifeMapper.selectHusband(Long.valueOf(qq));
             Random random = new Random();
             double randomProbability = random.nextDouble() * 100;
@@ -386,17 +375,15 @@ public class WifePlugin extends BotPlugin {
         matcher = pattern.matcher(event.getMessage());
         if (matcher.matches()) {
             if (isMarry(bot, event, true)) {
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
             User user = moneyMapper.selectUser(event.getUserId());
             if (user.getMoney() < 100) {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("你积分不够了!你只有" + user.getMoney() + "积分!攒够100积分再来吧!").build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
-            String qq = matcher.group(1);
-            if (qq == null) qq = matcher.group(2);
-            if (qq == null) qq = matcher.group(3);
+            String qq = matcher.group(1) != null ? matcher.group(1) : matcher.group(2) != null ? matcher.group(2) : matcher.group(3);
             Wife wife = wifeMapper.selectHusband(Long.valueOf(qq));
             Random random = new Random();
             double randomProbability = random.nextDouble() * 100;
@@ -453,7 +440,7 @@ public class WifePlugin extends BotPlugin {
                     .text("没想到你们会走到这一步，祝你们各自安好。").build();
             bot.sendGroupMsg(event.getGroupId(), msg, false);
         }
-        return MESSAGE_IGNORE;
+        return ReturnType.IGNORE_TRUE();
     }
 
     private boolean isMarry(Bot bot, GroupMessageEvent event, boolean isMsg) {

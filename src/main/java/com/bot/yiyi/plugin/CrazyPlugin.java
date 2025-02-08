@@ -1,5 +1,6 @@
 package com.bot.yiyi.plugin;
 
+import com.bot.yiyi.Pojo.ReturnType;
 import com.bot.yiyi.utils.AtUtil;
 import com.bot.yiyi.utils.HttpPostExample;
 import com.mikuac.shiro.common.utils.MsgUtils;
@@ -43,12 +44,12 @@ public class CrazyPlugin extends BotPlugin {
             msgList.add(crazy);
             msgList.add(img);
             bot.sendGroupForwardMsg(event.getGroupId(), AtUtil.toForward(data.getNickname(), data.getUserId(), msgList));
-            return MESSAGE_IGNORE;
+            return ReturnType.IGNORE_FALSE();
         }
         if (event.getMessage().contains("发电") || event.getMessage().contains("发癫") || event.getMessage().contains("爱你")) {
             List<Long> qqList = AtUtil.extractQQs(event.getMessage());
             if (qqList.isEmpty()) {
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_TRUE();
             }
             if (qqList.size() == 1) {
                 StrangerInfoResp toStrangerInfo = bot.getStrangerInfo(qqList.get(0), true).getData();
@@ -57,7 +58,10 @@ public class CrazyPlugin extends BotPlugin {
                 msgList.add(crazy);
                 msgList.add(img);
                 bot.sendGroupForwardMsg(event.getGroupId(), AtUtil.toForward(strangerInfo.getNickname(), event.getUserId(), msgList));
-                return MESSAGE_IGNORE;
+                if (qqList.get(0) != bot.getSelfId())
+                    return ReturnType.IGNORE_TRUE();
+                else
+                    return ReturnType.IGNORE_FALSE();
             } else if (qqList.size() == 2) {
                 StrangerInfoResp toStrangerInfo = bot.getStrangerInfo(qqList.get(1), true).getData();
                 StrangerInfoResp fromStrangerInfo = bot.getStrangerInfo(qqList.get(0), true).getData();
@@ -66,15 +70,17 @@ public class CrazyPlugin extends BotPlugin {
                 msgList.add(crazy);
                 msgList.add(img);
                 bot.sendGroupForwardMsg(event.getGroupId(), AtUtil.toForward(fromStrangerInfo.getNickname(), fromStrangerInfo.getUserId(), msgList));
-                return MESSAGE_IGNORE;
+                if (qqList.get(0) != bot.getSelfId() && qqList.get(1) != bot.getSelfId())
+                    return ReturnType.IGNORE_TRUE();
+                else
+                    return ReturnType.IGNORE_FALSE();
             } else {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("你还想要多少？渣男！").build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_TRUE();
             }
         }
-        // 返回 MESSAGE_IGNORE 执行 plugin-list 下一个插件，返回 MESSAGE_BLOCK 则不执行下一个插件
-        return MESSAGE_IGNORE;
+        return ReturnType.IGNORE_TRUE();
     }
 
 }

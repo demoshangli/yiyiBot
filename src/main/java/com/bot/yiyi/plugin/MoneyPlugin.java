@@ -1,5 +1,6 @@
 package com.bot.yiyi.plugin;
 
+import com.bot.yiyi.Pojo.ReturnType;
 import com.bot.yiyi.Pojo.User;
 import com.bot.yiyi.mapper.MoneyMapper;
 import com.mikuac.shiro.common.utils.MsgUtils;
@@ -34,19 +35,19 @@ public class MoneyPlugin extends BotPlugin {
             if (user.getLastCheckTime() != null && user.getLastCheckTime().equals(today)) {
                 String message = MsgUtils.builder().at(event.getUserId()).text("今天已经打卡过了!").build();
                 bot.sendGroupMsg(event.getGroupId(), message, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
             int money = random.nextInt(100);
             moneyMapper.checkIn(event.getUserId(), money, today);
             String message = MsgUtils.builder().at(event.getUserId()).text("打卡成功，获得" + money + "点积分").build();
             bot.sendGroupMsg(event.getGroupId(), message, false);
-            return MESSAGE_IGNORE;
+            return ReturnType.IGNORE_FALSE();
         }
         moneySet = new HashSet<>(Arrays.asList("我的积分", "积分", atBot + "我的积分", atBot + "积分"));
         if(moneySet.contains(event.getMessage())) {
             String message = MsgUtils.builder().at(event.getUserId()).text("你当前的积分为:" + user.getMoney() + "\n你银行中的积分为:" + user.getBank()).build();
             bot.sendGroupMsg(event.getGroupId(), message, false);
-            return MESSAGE_IGNORE;
+            return ReturnType.IGNORE_FALSE();
         }
         moneySet = new HashSet<>(Arrays.asList("积分抽奖", "积分赌狗", atBot + "积分抽奖", atBot + "积分赌狗"));
         if(moneySet.contains(event.getMessage())) {
@@ -55,7 +56,7 @@ public class MoneyPlugin extends BotPlugin {
                 if (time[0].equals(String.valueOf(today)) && time[1].equals("11111")) {
                 String message = MsgUtils.builder().at(event.getUserId()).text("小赌怡情大赌伤身,今天已经抽过5次了!").build();
                 bot.sendGroupMsg(event.getGroupId(), message, false);
-                return MESSAGE_IGNORE;
+                    return ReturnType.IGNORE_FALSE();
                 }
                 if (!time[0].equals(String.valueOf(today))) {
                     user.setLotteryTime(today + ":");
@@ -66,7 +67,7 @@ public class MoneyPlugin extends BotPlugin {
             if (user.getMoney() < 0) {
                 String message = MsgUtils.builder().at(event.getUserId()).text("负豪不允许参加!").build();
                 bot.sendGroupMsg(event.getGroupId(), message, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
             Map<String, Integer> result = luckyDraw(user.getMoney());
             String key = result.keySet().iterator().next();
@@ -74,7 +75,7 @@ public class MoneyPlugin extends BotPlugin {
             moneyMapper.updateLotteryTime(event.getUserId(), user.getLotteryTime() + "1");
             String message = MsgUtils.builder().at(event.getUserId()).text("恭喜你抽中了 积分" + key + ",你当前的积分为" + result.get(key)).build();
             bot.sendGroupMsg(event.getGroupId(), message, false);
-            return MESSAGE_IGNORE;
+            return ReturnType.IGNORE_FALSE();
         }
         moneySet = new HashSet<>(Arrays.asList("富豪榜", atBot + "富豪榜"));
         if (moneySet.contains(event.getMessage())) {
@@ -87,7 +88,7 @@ public class MoneyPlugin extends BotPlugin {
                 i++;
             }
             bot.sendGroupMsg(event.getGroupId(), list.toString(), false);
-            return MESSAGE_IGNORE;
+            return ReturnType.IGNORE_FALSE();
         }
         moneySet = new HashSet<>(Arrays.asList("负豪榜", atBot + "负豪榜"));
         if (moneySet.contains(event.getMessage())) {
@@ -100,7 +101,7 @@ public class MoneyPlugin extends BotPlugin {
                 i++;
             }
             bot.sendGroupMsg(event.getGroupId(), list.toString(), false);
-            return MESSAGE_IGNORE;
+            return ReturnType.IGNORE_FALSE();
         }
         moneySet = new HashSet<>(Arrays.asList("群富豪榜", atBot + "群富豪榜"));
         if (moneySet.contains(event.getMessage())) {
@@ -113,7 +114,7 @@ public class MoneyPlugin extends BotPlugin {
                 i++;
             }
             bot.sendGroupMsg(event.getGroupId(), list.toString(), false);
-            return MESSAGE_IGNORE;
+            return ReturnType.IGNORE_FALSE();
         }
         moneySet = new HashSet<>(Arrays.asList("群负豪榜", atBot + "群负豪榜"));
         if (moneySet.contains(event.getMessage())) {
@@ -126,7 +127,7 @@ public class MoneyPlugin extends BotPlugin {
                 i++;
             }
             bot.sendGroupMsg(event.getGroupId(), list.toString(), false);
-            return MESSAGE_IGNORE;
+            return ReturnType.IGNORE_FALSE();
         }
         Pattern pattern = Pattern.compile("赠送积分(\\d+)\\[CQ:at,qq=(\\d+)]");
         Matcher matcher = pattern.matcher(event.getMessage());
@@ -136,13 +137,13 @@ public class MoneyPlugin extends BotPlugin {
             if (user.getMoney() < Integer.parseInt(points)) {
                 String message = MsgUtils.builder().at(event.getUserId()).text("你没有这么多积分").build();
                 bot.sendGroupMsg(event.getGroupId(), message, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
             moneyMapper.updateMoney(event.getUserId(), user.getMoney() - Integer.parseInt(points));
             moneyMapper.addMoney(Long.parseLong(qq), Integer.parseInt(points));
             String message = MsgUtils.builder().at(event.getUserId()).text("赠送积分成功").build();
             bot.sendGroupMsg(event.getGroupId(), message, false);
-            return MESSAGE_IGNORE;
+            return ReturnType.IGNORE_FALSE();
         }
         pattern = Pattern.compile("存储积分(\\d+)");
         matcher = pattern.matcher(event.getMessage());
@@ -151,12 +152,12 @@ public class MoneyPlugin extends BotPlugin {
             if (user.getMoney() < Integer.parseInt(points)) {
                 String message = MsgUtils.builder().at(event.getUserId()).text("你没有这么多积分").build();
                 bot.sendGroupMsg(event.getGroupId(), message, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
             moneyMapper.storage(event.getUserId(), Integer.parseInt(points));
             String message = MsgUtils.builder().at(event.getUserId()).text("存储积分成功,银行中的积分不会用来抽奖哦").build();
             bot.sendGroupMsg(event.getGroupId(), message, false);
-            return MESSAGE_IGNORE;
+            return ReturnType.IGNORE_FALSE();
         }
         pattern = Pattern.compile("取出积分(\\d+)");
         matcher = pattern.matcher(event.getMessage());
@@ -165,12 +166,12 @@ public class MoneyPlugin extends BotPlugin {
             if (user.getBank() < Integer.parseInt(points)) {
                 String message = MsgUtils.builder().at(event.getUserId()).text("你没有这么多积分").build();
                 bot.sendGroupMsg(event.getGroupId(), message, false);
-                return MESSAGE_IGNORE;
+                return ReturnType.IGNORE_FALSE();
             }
             moneyMapper.withdrawal(event.getUserId(), Integer.parseInt(points));
             String message = MsgUtils.builder().at(event.getUserId()).text("取出积分成功").build();
             bot.sendGroupMsg(event.getGroupId(), message, false);
         }
-        return MESSAGE_IGNORE;
+        return ReturnType.IGNORE_TRUE();
     }
 }

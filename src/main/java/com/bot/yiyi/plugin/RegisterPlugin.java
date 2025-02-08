@@ -1,5 +1,6 @@
 package com.bot.yiyi.plugin;
 
+import com.bot.yiyi.Pojo.ReturnType;
 import com.bot.yiyi.Pojo.User;
 import com.bot.yiyi.mapper.MoneyMapper;
 import com.mikuac.shiro.core.Bot;
@@ -24,7 +25,7 @@ public class RegisterPlugin extends BotPlugin {
         if (user == null) {
             moneyMapper.insertUser(event.getUserId());
         }
-        return MESSAGE_IGNORE;
+        return ReturnType.IGNORE_TRUE();
     }
 
     @Override
@@ -32,6 +33,6 @@ public class RegisterPlugin extends BotPlugin {
        if (moneyMapper.selectGroupIsHave(event.getUserId(), event.getGroupId()) == null) {
             moneyMapper.addGroupUser(event.getUserId(), event.getGroupId());
        }
-       return MESSAGE_IGNORE;
+       return ReturnType.IGNORE_TRUE();
     }
 }
