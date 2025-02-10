@@ -38,3 +38,6 @@ spring:
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.bot.yiyi.pojo
+bot:
+  owner:
+    qq: 2376539644

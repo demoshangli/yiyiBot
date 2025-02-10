@@ -4,6 +4,7 @@ import com.bot.yiyi.Pojo.Model;
 import com.bot.yiyi.Pojo.ReturnType;
 import com.bot.yiyi.Pojo.Role;
 import com.bot.yiyi.config.AIConfig;
+import com.bot.yiyi.config.BotConfig;
 import com.bot.yiyi.mapper.AIMapper;
 import com.bot.yiyi.utils.AtUtil;
 import com.mikuac.shiro.common.utils.MsgUtils;
@@ -27,6 +28,7 @@ import org.springframework.util.MimeTypeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -39,6 +41,8 @@ public class AiPlugin extends BotPlugin {
     private final ChatClient.Builder builder;
     @Autowired
     public AIMapper aiMapper;
+    @Autowired
+    private BotConfig botConfig;
 
     public AiPlugin(ChatClient chatClient, ChatClient.Builder builder) {
         this.chatClient = chatClient;
@@ -51,7 +55,7 @@ public class AiPlugin extends BotPlugin {
         if (AtUtil.isAt(bot.getLoginInfo().getData(), event)) {
             if (event.getMessage().contains("切换角色")) {
                 String role = bot.getGroupMemberInfo(event.getGroupId(), event.getUserId(), true).getData().getRole();
-                if (event.getUserId() == 2376539644L || role.equals("owner") || role.equals("admin")) {
+                if (Objects.equals(event.getUserId(), botConfig.getQq()) || role.equals("owner") || role.equals("admin")) {
                     if (event.getMessage().contains("切换角色默认")) {
                         aiMapper.updateRole(event.getGroupId(), 0);
                         bot.sendGroupMsg(event.getGroupId(), "依依已经切换到默认啦。", true);
