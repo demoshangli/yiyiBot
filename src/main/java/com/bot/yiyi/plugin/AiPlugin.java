@@ -4,6 +4,7 @@ import com.bot.yiyi.Pojo.Model;
 import com.bot.yiyi.Pojo.ReturnType;
 import com.bot.yiyi.Pojo.Role;
 import com.bot.yiyi.config.AIConfig;
+import com.bot.yiyi.mapper.AIMapper;
 import com.bot.yiyi.utils.AtUtil;
 import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.core.Bot;
@@ -19,6 +20,7 @@ import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.Media;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.MimeType;
 import org.springframework.util.MimeTypeUtils;
@@ -28,15 +30,15 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static com.bot.yiyi.plugin.RegisterPlugin.atBot;
+
 @Component
 public class AiPlugin extends BotPlugin {
 
     private ChatClient chatClient;
     private final ChatClient.Builder builder;
-
-    public int roleType = 0;
-
-    public int modelType = 0;
+    @Autowired
+    public AIMapper aiMapper;
 
     public AiPlugin(ChatClient chatClient, ChatClient.Builder builder) {
         this.chatClient = chatClient;
@@ -47,60 +49,57 @@ public class AiPlugin extends BotPlugin {
     @Override
     public int onGroupMessage(Bot bot, GroupMessageEvent event) {
         if (AtUtil.isAt(bot.getLoginInfo().getData(), event)) {
-            if (event.getUserId() == 2376539644L) {
-                if (event.getMessage().contains("切换角色默认")) {
-                    roleType = 0;
-                    updateRole(Role.DEFAULT);
-                    bot.sendGroupMsg(event.getGroupId(), "依依已经切换到默认啦。", true);
-                    return ReturnType.BLOCK_FALSE();
-                } else if (event.getMessage().contains("切换角色老婆")) {
-                    roleType = 1;
-                    updateRole(Role.WIFE);
-                    bot.sendGroupMsg(event.getGroupId(), "依依已经切换到老婆啦。", true);
-                    return ReturnType.BLOCK_FALSE();
-                } else if (event.getMessage().contains("切换角色女仆")) {
-                    roleType = 2;
-                    updateRole(Role.MAID);
-                    bot.sendGroupMsg(event.getGroupId(), "依依已经切换到女仆啦。", true);
-                    return ReturnType.BLOCK_FALSE();
-                } else if (event.getMessage().contains("切换角色魅魔")) {
-                    roleType = 3;
-                    updateRole(Role.SUCCUBUS);
-                    bot.sendGroupMsg(event.getGroupId(), "依依已经切换到魅魔啦。", true);
-                    return ReturnType.BLOCK_FALSE();
-                } else if (event.getMessage().contains("切换角色攻击")) {
-                    roleType = 4;
-                    updateRole(Role.ATTACK);
-                    bot.sendGroupMsg(event.getGroupId(), "依依已经切换到攻击啦。", true);
-                    return ReturnType.BLOCK_FALSE();
-                } else if (event.getMessage().contains("切换角色美少女")) {
-                    roleType = 5;
-                    updateRole(Role.GIRL);
-                    bot.sendGroupMsg(event.getGroupId(), "依依已经切换到美少女啦。", true);
-                    return ReturnType.BLOCK_FALSE();
-                } else if (event.getMessage().contains("当前角色")) {
-                    switch (roleType) {
-                        case 0:
-                            bot.sendGroupMsg(event.getGroupId(), "当前角色为默认。", true);
-                            break;
-                        case 1:
-                            bot.sendGroupMsg(event.getGroupId(), "当前角色为老婆。", true);
-                            break;
-                        case 2:
-                            bot.sendGroupMsg(event.getGroupId(), "当前角色为女仆。", true);
-                            break;
-                        case 3:
-                            bot.sendGroupMsg(event.getGroupId(), "当前角色为魅魔。", true);
-                            break;
-                        case 4:
-                            bot.sendGroupMsg(event.getGroupId(), "当前角色为攻击。", true);
-                            break;
-                        case 5:
-                            bot.sendGroupMsg(event.getGroupId(), "当前角色为美少女。", true);
-                            break;
+            if (event.getMessage().contains("切换角色")) {
+                String role = bot.getGroupMemberInfo(event.getGroupId(), event.getUserId(), true).getData().getRole();
+                if (event.getUserId() == 2376539644L || role.equals("owner") || role.equals("admin")) {
+                    if (event.getMessage().contains("切换角色默认")) {
+                        aiMapper.updateRole(event.getGroupId(), 0);
+                        bot.sendGroupMsg(event.getGroupId(), "依依已经切换到默认啦。", true);
+                        return ReturnType.BLOCK_FALSE();
+                    } else if (event.getMessage().contains("切换角色老婆")) {
+                        aiMapper.updateRole(event.getGroupId(), 1);
+                        bot.sendGroupMsg(event.getGroupId(), "依依已经切换到老婆啦。", true);
+                        return ReturnType.BLOCK_FALSE();
+                    } else if (event.getMessage().contains("切换角色女仆")) {
+                        aiMapper.updateRole(event.getGroupId(), 2);
+                        bot.sendGroupMsg(event.getGroupId(), "依依已经切换到女仆啦。", true);
+                        return ReturnType.BLOCK_FALSE();
+                    } else if (event.getMessage().contains("切换角色魅魔")) {
+                        aiMapper.updateRole(event.getGroupId(), 3);
+                        bot.sendGroupMsg(event.getGroupId(), "依依已经切换到魅魔啦。", true);
+                        return ReturnType.BLOCK_FALSE();
+                    } else if (event.getMessage().contains("切换角色攻击")) {
+                        aiMapper.updateRole(event.getGroupId(), 4);
+                        bot.sendGroupMsg(event.getGroupId(), "依依已经切换到攻击啦。", true);
+                        return ReturnType.BLOCK_FALSE();
+                    } else if (event.getMessage().contains("切换角色美少女")) {
+                        aiMapper.updateRole(event.getGroupId(), 5);
+                        bot.sendGroupMsg(event.getGroupId(), "依依已经切换到美少女啦。", true);
+                        return ReturnType.BLOCK_FALSE();
+                    } else if (event.getMessage().contains("当前角色")) {
+                        int roleType = aiMapper.selectRole(event.getGroupId());
+                        switch (roleType) {
+                            case 0:
+                                bot.sendGroupMsg(event.getGroupId(), "当前角色为默认。", true);
+                                break;
+                            case 1:
+                                bot.sendGroupMsg(event.getGroupId(), "当前角色为老婆。", true);
+                                break;
+                            case 2:
+                                bot.sendGroupMsg(event.getGroupId(), "当前角色为女仆。", true);
+                                break;
+                            case 3:
+                                bot.sendGroupMsg(event.getGroupId(), "当前角色为魅魔。", true);
+                                break;
+                            case 4:
+                                bot.sendGroupMsg(event.getGroupId(), "当前角色为攻击。", true);
+                                break;
+                            case 5:
+                                bot.sendGroupMsg(event.getGroupId(), "当前角色为美少女。", true);
+                                break;
+                        }
+                        return ReturnType.BLOCK_FALSE();
                     }
-                    return ReturnType.BLOCK_FALSE();
-                }
 //                if (event.getMessage().contains("切换模型")) {
 //                    if (event.getMessage().contains("deepseek-chat") || event.getMessage().contains("V3")) {
 //                        modelType = 1;
@@ -124,6 +123,11 @@ public class AiPlugin extends BotPlugin {
 //                        return ReturnType.BLOCK_FALSE();
 //                    }
 //                }
+                } else {
+                    String msg = MsgUtils.builder().at(event.getUserId()).text("只有群主、管理员才能切换依依的角色哦。").build();
+                    bot.sendGroupMsg(event.getGroupId(), msg, true);
+                    return ReturnType.BLOCK_FALSE();
+                }
             }
             if (ReturnType.getMatch()) {
                 Pattern pattern = Pattern.compile("\\[CQ:at,qq=(\\d+)\\]");
@@ -136,16 +140,37 @@ public class AiPlugin extends BotPlugin {
                 }
                 if (!qqList.isEmpty()) {
                     for (String qq : qqList) {
-                        if (qq.equals("3088103918")) {
-                            event.setMessage(event.getMessage().replaceAll("[CQ:at,qq=" + qq + "]", "依依"));
+                        if (qq.equals(String.valueOf(bot.getSelfId()))) {
+                            event.setMessage(event.getMessage().replaceAll(atBot, "依依(你的名字,可以忽略)"));
                         } else {
-                            ActionData<GroupMemberInfoResp> groupMemberInfo = bot.getGroupMemberInfo(event.getGroupId(), Long.valueOf(qq), false);
-                            event.setMessage(event.getMessage().replaceAll("[CQ:at,qq=" + qq + "]", groupMemberInfo.getData().getCard()));
+                            ActionData<GroupMemberInfoResp> groupMemberInfo = bot.getGroupMemberInfo(event.getGroupId(), Long.parseLong(qq), false);
+                            event.setMessage(event.getMessage().replaceAll("[CQ:at,qq=" + qq + "]", " " + groupMemberInfo.getData().getCard() + "(群友的名字) "));
                         }
                     }
                 }
                 String context = "";
-                pattern = Pattern.compile("^(.*?)(\\[CQ:image,[^\\]]*?url=([^,\\]]+)\\])(.*)?");
+                int roleType = aiMapper.selectRole(event.getGroupId());
+                switch (roleType) {
+                    case 0:
+                        updateRole(Role.DEFAULT);
+                        break;
+                    case 1:
+                        updateRole(Role.WIFE);
+                        break;
+                    case 2:
+                        updateRole(Role.MAID);
+                        break;
+                    case 3:
+                        updateRole(Role.SUCCUBUS);
+                        break;
+                    case 4:
+                        updateRole(Role.ATTACK);
+                        break;
+                    case 5:
+                        updateRole(Role.GIRL);
+                        break;
+                }
+                pattern = Pattern.compile("^(.*?)(\\[CQ:image,[^]]*?url=([^,\\]]+)])(.*)?");
                 matcher = pattern.matcher(event.getMessage());
                 if (matcher.find()) {
                     String beforeText = matcher.group(1) != null ? matcher.group(1) : "";
