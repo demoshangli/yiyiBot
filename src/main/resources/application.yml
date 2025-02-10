@@ -7,6 +7,7 @@ shiro:
       url: "/ws/yiyi"
   plugin-list:
     - com.bot.yiyi.plugin.RegisterPlugin
+    - com.bot.yiyi.plugin.ServerPlugin
     - com.bot.yiyi.plugin.MenuPlugin
     - com.bot.yiyi.plugin.CrazyPlugin
     - com.bot.yiyi.plugin.MoneyPlugin
@@ -28,7 +29,7 @@ spring:
     openai:
 #      api-key: sk-fe29bd4c8b1e41089b946317184954ea
 #      base-url: https://api.deepseek.com
-      api-key: sk-qkcmmcojfrgxxsjtjfrlpnrsqfjqbyglmnaillvlmtqpwfns
+      api-key: sk-jyeqqjjeeavcifoigfijvdgwydyvbtvzuemtjwnntxwlrfsa
       base-url: https://api.siliconflow.cn/
       chat:
         options:

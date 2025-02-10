@@ -33,7 +33,7 @@ public class AtUtil {
             Map<String, Object> node = new HashMap<>();
             node.put("type", "node");
             Map<String, Object> data = new HashMap<>();
-            data.put("uin", nick); // 机器人自己发送
+            data.put("uin", nick);
             data.put("name", name);
             data.put("content", msg);
             node.put("data", data);
