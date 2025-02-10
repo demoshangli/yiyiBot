@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bot.yiyi.mapper.UserMapper">
+    <insert id="insertUser">
+        insert into user values (#{userId},0,null,0,null)
+    </insert>
+    <insert id="addGroupUser">
+        insert into group_user_info values (0,#{userId},#{groupId})
+    </insert>
+    <insert id="addGroup">
+        insert into group_info values (0,#{groupId},0)
+    </insert>
+    <select id="selectUser" resultType="com.bot.yiyi.Pojo.User">
+        select id, money, last_check_time as lastCheckTime, bank, lottery_time as lotteryTime from user where id = #{userId}
+    </select>
+    <select id="selectGroupUserIsHave" resultType="java.lang.Integer">
+        select id from group_user_info where user_id = #{userId} and group_id = #{groupId}
+    </select>
+    <select id="selectGroupIsHave" resultType="java.lang.Integer">
+        select id from group_info where group_id = #{groupId}
+    </select>
+</mapper>

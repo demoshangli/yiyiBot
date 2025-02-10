@@ -3,6 +3,7 @@ package com.bot.yiyi.plugin;
 import com.bot.yiyi.Pojo.ReturnType;
 import com.bot.yiyi.Pojo.User;
 import com.bot.yiyi.mapper.MoneyMapper;
+import com.bot.yiyi.mapper.UserMapper;
 import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.core.BotPlugin;
@@ -23,11 +24,13 @@ public class MoneyPlugin extends BotPlugin {
 
     @Autowired
     private MoneyMapper moneyMapper;
+    @Autowired
+    private UserMapper usersMapper;
 
     @Override
     public int onGroupMessage(Bot bot, GroupMessageEvent event) {
         event.setMessage(event.getMessage().trim());
-        User user = moneyMapper.selectUser(event.getUserId());
+        User user = usersMapper.selectUser(event.getUserId());
         Random random = new Random();
         LocalDate today = LocalDate.now();
         Set<String> moneySet = new HashSet<>(Arrays.asList("打卡", "签到", atBot + "打卡", atBot + "签到"));

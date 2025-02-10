@@ -4,6 +4,7 @@ import com.bot.yiyi.Pojo.ReturnType;
 import com.bot.yiyi.Pojo.User;
 import com.bot.yiyi.Pojo.Wife;
 import com.bot.yiyi.mapper.MoneyMapper;
+import com.bot.yiyi.mapper.UserMapper;
 import com.bot.yiyi.mapper.WifeMapper;
 import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.common.utils.OneBotMedia;
@@ -30,6 +31,8 @@ public class WifePlugin extends BotPlugin {
     private WifeMapper wifeMapper;
     @Autowired
     private MoneyMapper moneyMapper;
+    @Autowired
+    private UserMapper usersMapper;
     @Autowired
     private RedisTemplate redisTemplate;
 
@@ -139,6 +142,8 @@ public class WifePlugin extends BotPlugin {
             }
             if (redisTemplate.hasKey("join"+ event.getUserId())) {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("你还没出狱呢！" + redisTemplate.getExpire("join"+ event.getUserId(), TimeUnit.SECONDS) + "秒后再来吧。").build();
+                bot.sendGroupMsg(event.getGroupId(), msg, false);
+                return ReturnType.IGNORE_FALSE();
             }
             String qq = matcher.group(1) != null ? matcher.group(1) : matcher.group(2) != null ? matcher.group(2) : matcher.group(3);
             if (isMarry(bot, GroupMessageEvent.builder().userId(Long.parseLong(qq)).groupId(event.getGroupId()).build(), false)) {
@@ -171,6 +176,8 @@ public class WifePlugin extends BotPlugin {
             }
             if (redisTemplate.hasKey("join"+ event.getUserId())) {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("你还没出狱呢！" + redisTemplate.getExpire("join"+ event.getUserId(), TimeUnit.SECONDS) + "秒后再来吧。").build();
+                bot.sendGroupMsg(event.getGroupId(), msg, false);
+                return ReturnType.IGNORE_FALSE();
             }
             String qq = matcher.group(1) != null ? matcher.group(1) : matcher.group(2) != null ? matcher.group(2) : matcher.group(3);
             if (isMarry(bot, GroupMessageEvent.builder().userId(Long.parseLong(qq)).groupId(event.getGroupId()).build(), false)) {
@@ -321,7 +328,7 @@ public class WifePlugin extends BotPlugin {
             if (isMarry(bot, event, true)) {
                 return ReturnType.IGNORE_FALSE();
             }
-            User user = moneyMapper.selectUser(event.getUserId());
+            User user = usersMapper.selectUser(event.getUserId());
             if (user.getMoney() < 100) {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("你积分不够了!你只有" + user.getMoney() + "积分!攒够100积分再来吧!").build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
@@ -377,7 +384,7 @@ public class WifePlugin extends BotPlugin {
             if (isMarry(bot, event, true)) {
                 return ReturnType.IGNORE_FALSE();
             }
-            User user = moneyMapper.selectUser(event.getUserId());
+            User user = usersMapper.selectUser(event.getUserId());
             if (user.getMoney() < 100) {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("你积分不够了!你只有" + user.getMoney() + "积分!攒够100积分再来吧!").build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);

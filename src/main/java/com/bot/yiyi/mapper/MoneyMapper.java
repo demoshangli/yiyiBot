@@ -12,10 +12,6 @@ import java.util.List;
 @Repository
 public interface MoneyMapper {
 
-    User selectUser(Long userId);
-
-    void insertUser(Long userId);
-
     void updateMoney(@Param("userId") Long userId, @Param("money") int money);
 
     void checkIn(@Param("userId") Long userId, @Param("money") int money, @Param("today") LocalDate today);
@@ -25,10 +21,6 @@ public interface MoneyMapper {
     List<User> selectMAX();
 
     List<User> selectMIN();
-
-    Integer selectGroupIsHave(@Param("userId") Long userId, @Param("groupId") Long groupId);
-
-    void addGroupUser(@Param("userId") Long userId, @Param("groupId") Long groupId);
 
     List<User> selectGroupMAX(Long groupId);
 
