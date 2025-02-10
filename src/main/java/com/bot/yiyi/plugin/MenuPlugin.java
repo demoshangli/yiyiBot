@@ -15,15 +15,13 @@ public class MenuPlugin extends BotPlugin {
         if (event.getMessage().contains("菜单")) {
             String msg = MsgUtils.builder().at(event.getUserId())
                     .text("\n依依菜单\n" +
-                            "\n" +
-                            "发癫模式\n" +
+                            "\n发癫模式\n" +
                             "随机输出各种有趣、魔性的内容，带来欢乐体验。\n" +
                             "\n积分系统\n" +
                             "记录并查询用户积分，完成任务可获得更多积分。\n" +
                             "\n结婚系统\n" +
-                            "\n" +
                             "绑定关系，与指定用户建立虚拟婚姻。\n" +
-                            "智能对话\n" +
+                            "\n智能对话\n" +
                             "进行自由对话，提供信息和交流互动。\n" +
                             "\n发送对应插件，如 \"发癫模式\" 或 \"积分系统\" 来查看相应功能指令。").build();
             bot.sendGroupMsg(event.getGroupId(), msg, false);
