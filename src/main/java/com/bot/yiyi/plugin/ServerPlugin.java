@@ -57,7 +57,7 @@ public class ServerPlugin extends BotPlugin {
             latch.await();
             webSocketClient.close();
             String[] serverData = serverInfo[0].split("\\|@\\|");
-            int validLength = Math.max(0, serverData.length - 3);
+            int validLength = Math.max(0, 8);
             List<String> msgList = new ArrayList<>();
             for (int i = 0; i < validLength; i++) {
                 JSONObject server = JSONObject.parseObject(serverData[i]);

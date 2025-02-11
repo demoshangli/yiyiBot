@@ -5,8 +5,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-@ConfigurationProperties(prefix = "bot.owner")
+@ConfigurationProperties(prefix = "bot")
 @Data
 public class BotConfig {
-    private Long qq;
+    private Long ownerQQ;
 }
