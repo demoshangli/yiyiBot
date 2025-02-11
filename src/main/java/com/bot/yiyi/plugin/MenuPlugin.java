@@ -72,7 +72,16 @@ public class MenuPlugin extends BotPlugin {
         if (event.getMessage().contains("智能对话")) {
             String msg = MsgUtils.builder().at(event.getUserId())
                     .text("智能对话" +
-                            "@依依 就可以和依依对话啦！"
+                            "\n@依依 就可以和依依对话啦！" +
+                            "\n@依依切换角色+角色 可以切换角色哦~" +
+                            "\n目前角色有:" +
+                            "\n-默认" +
+                            "\n-老婆" +
+                            "\n-女仆" +
+                            "\n-魅魔" +
+                            "\n-美少女" +
+                            "\n-攻击" +
+                            "\nps:只有群主和管理员才可以切换角色哦~"
                     ).build();
             bot.sendGroupMsg(event.getGroupId(), msg, false);
             return ReturnType.BLOCK_TRUE();
