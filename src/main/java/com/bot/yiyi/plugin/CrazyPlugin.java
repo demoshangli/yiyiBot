@@ -49,7 +49,7 @@ public class CrazyPlugin extends BotPlugin {
         if (event.getMessage().contains("发电") || event.getMessage().contains("发癫") || event.getMessage().contains("爱你")) {
             List<Long> qqList = AtUtil.extractQQs(event.getMessage());
             if (qqList.isEmpty()) {
-                return ReturnType.IGNORE_TRUE();
+                return ReturnType.IGNORE_FALSE();
             }
             if (qqList.size() == 1) {
                 StrangerInfoResp toStrangerInfo = bot.getStrangerInfo(qqList.get(0), true).getData();
@@ -77,7 +77,7 @@ public class CrazyPlugin extends BotPlugin {
             } else {
                 String msg = MsgUtils.builder().at(event.getUserId()).text("你还想要多少？渣男！").build();
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return ReturnType.IGNORE_TRUE();
+                return ReturnType.IGNORE_FALSE();
             }
         }
         return ReturnType.IGNORE_TRUE();
