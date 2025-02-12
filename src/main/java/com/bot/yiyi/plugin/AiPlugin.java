@@ -68,7 +68,7 @@ public class AiPlugin extends BotPlugin {
                         return ReturnType.BLOCK_FALSE();
                     } else if (event.getMessage().contains("切换角色贴吧老哥")) {
                         aiMapper.updateRole(event.getGroupId(), 4);
-                        bot.sendGroupMsg(event.getGroupId(), "依依已经切换到攻击啦。", true);
+                        bot.sendGroupMsg(event.getGroupId(), "依依已经切换到贴吧老哥啦。", true);
                         return ReturnType.BLOCK_FALSE();
                     } else if (event.getMessage().contains("切换角色美少女")) {
                         aiMapper.updateRole(event.getGroupId(), 5);
