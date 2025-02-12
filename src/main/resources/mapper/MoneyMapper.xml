@@ -31,12 +31,12 @@
     </select>
     <select id="selectGroupMAX" resultType="com.bot.yiyi.Pojo.User">
         <![CDATA[select u.id, u.money + u.bank as money from user u
-                join group_info g on u.id = g.user_id and g.group_id = #{groupId}
+                join group_user_info g on u.id = g.user_id and g.group_id = #{groupId}
                 where u.money + u.bank > 0 order by u.money + u.bank desc limit 10]]>
     </select>
     <select id="selectGroupMIN" resultType="com.bot.yiyi.Pojo.User">
         <![CDATA[select u.id, u.money + u.bank as money from user u
-                join group_info g on u.id = g.user_id and g.group_id = #{groupId}
+                join group_user_info g on u.id = g.user_id and g.group_id = #{groupId}
                 where u.money + u.bank < 0 order by u.money + u.bank asc limit 10]]>
     </select>
 </mapper>
