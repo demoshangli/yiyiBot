@@ -347,6 +347,7 @@ public class WifePlugin extends BotPlugin {
                     moneyMapper.deductionMoney(event.getUserId(), money);
                     String msg = MsgUtils.builder().at(event.getUserId()).text("恭喜你花费" + money + "积分抢到了")
                             .at(Long.parseLong(wife.getHusband())).text("的老婆!\n")
+                            .img(OneBotMedia.builder().file("https://q1.qlogo.cn/g?b=qq&nk=" + qq + "&s=640"))
                             .text("她现在是你的老婆了!").build();
                     bot.sendGroupMsg(event.getGroupId(), msg, false);
                     msg = MsgUtils.builder().at(Long.parseLong(wife.getHusband())).text("你的老婆不要你了!和别人跑掉了!").build();
@@ -364,6 +365,7 @@ public class WifePlugin extends BotPlugin {
                     moneyMapper.deductionMoney(event.getUserId(), money);
                     String msg = MsgUtils.builder().at(event.getUserId()).text("恭喜你花费" + money + "积分抢到了")
                             .at(Long.parseLong(wife.getWife())).text("的老公!\n")
+                            .img(OneBotMedia.builder().file("https://q1.qlogo.cn/g?b=qq&nk=" + qq + "&s=640"))
                             .text("她现在是你的老婆了!").build();
                     bot.sendGroupMsg(event.getGroupId(), msg, false);
                     msg = MsgUtils.builder().at(Long.parseLong(wife.getWife())).text("你的老公不要你了!和别人跑掉了!").build();
@@ -403,6 +405,7 @@ public class WifePlugin extends BotPlugin {
                     moneyMapper.deductionMoney(event.getUserId(), money);
                     String msg = MsgUtils.builder().at(event.getUserId()).text("恭喜你花费" + money + "积分抢到了")
                             .at(Long.parseLong(wife.getHusband())).text("的老婆!\n")
+                            .img(OneBotMedia.builder().file("https://q1.qlogo.cn/g?b=qq&nk=" + qq + "&s=640"))
                             .text("他现在是你的老公了!").build();
                     bot.sendGroupMsg(event.getGroupId(), msg, false);
                     msg = MsgUtils.builder().at(Long.parseLong(wife.getHusband())).text("你的老婆不要你了!和别人跑掉了!").build();
@@ -420,6 +423,7 @@ public class WifePlugin extends BotPlugin {
                     moneyMapper.deductionMoney(event.getUserId(), money);
                     String msg = MsgUtils.builder().at(event.getUserId()).text("恭喜你花费" + money + "积分抢到了")
                             .at(Long.parseLong(wife.getWife())).text("的老公!\n")
+                            .img(OneBotMedia.builder().file("https://q1.qlogo.cn/g?b=qq&nk=" + qq + "&s=640"))
                             .text("他现在是你的老公了!").build();
                     bot.sendGroupMsg(event.getGroupId(), msg, false);
                     msg = MsgUtils.builder().at(Long.parseLong(wife.getWife())).text("你的老公不要你了!和别人跑掉了!").build();
