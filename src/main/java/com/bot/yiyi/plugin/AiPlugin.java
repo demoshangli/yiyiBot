@@ -135,7 +135,7 @@ public class AiPlugin extends BotPlugin {
                 }
             }
             if (ReturnType.getMatch()) {
-                event.setMessage(event.getMessage().replaceAll("\\[CQ:reply,id=\\d+\\]", "").trim());
+                event.setMessage(event.getMessage().replaceAll("\\[CQ:reply,id=\\d+]", "").trim());
                 Pattern pattern = Pattern.compile("\\[CQ:at,qq=(\\d+)]");
                 Matcher matcher = pattern.matcher(event.getMessage());
                 List<String> qqList = new ArrayList<>();

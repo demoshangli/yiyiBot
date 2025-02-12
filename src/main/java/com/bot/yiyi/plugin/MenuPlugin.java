@@ -29,7 +29,7 @@ public class MenuPlugin extends BotPlugin {
         }
         if (event.getMessage().contains("发癫模式")) {
             String msg = MsgUtils.builder().at(event.getUserId())
-                    .text("发癫模式" +
+                    .text("发癫模式\n" +
                             "@依依 —— 依依主动对你发癫。\n" +
                             "@+发癫 —— 你对@的人发癫。\n" +
                             "@+发癫+@ —— 指定某人对另一个人发癫。").build();
@@ -38,7 +38,7 @@ public class MenuPlugin extends BotPlugin {
         }
         if (event.getMessage().contains("积分系统")) {
             String msg = MsgUtils.builder().at(event.getUserId())
-                    .text("积分系统" +
+                    .text("积分系统\n" +
                             "打卡 / 签到 —— 每日签到领取积分。\n" +
                             "积分抽奖 / 积分赌狗 —— 使用积分进行抽奖或赌积分。\n" +
                             "我的积分 / 积分 —— 查询自己的当前积分。\n" +
@@ -55,7 +55,7 @@ public class MenuPlugin extends BotPlugin {
         }
         if (event.getMessage().contains("结婚系统")) {
             String msg = MsgUtils.builder().at(event.getUserId())
-                    .text("结婚系统" +
+                    .text("结婚系统\n" +
                             "娶群友 / 娶老婆 —— 随机迎娶某人。\n" +
                             "嫁群友 / 嫁老公 —— 随机嫁给某人。\n" +
                             "娶+@ —— 向指定用户求婚。\n" +
@@ -71,18 +71,18 @@ public class MenuPlugin extends BotPlugin {
         }
         if (event.getMessage().contains("智能对话")) {
             String msg = MsgUtils.builder().at(event.getUserId())
-                    .text("智能对话" +
-                            "\n@依依 就可以和依依对话啦！" +
-                            "\n@依依切换角色+角色 可以切换角色哦~" +
-                            "\n目前角色有:" +
-                            "\n-默认" +
-                            "\n-老婆" +
-                            "\n-女仆" +
-                            "\n-魅魔" +
-                            "\n-美少女" +
-                            "\n-贴吧老哥" +
-                            "\n-傲娇猫娘" +
-                            "\nps:只有群主和管理员才可以切换角色哦~"
+                    .text("智能对话\n" +
+                            "@依依 就可以和依依对话啦！\n" +
+                            "@依依切换角色+角色 可以切换角色哦~\n" +
+                            "目前角色有:\n" +
+                            "-默认\n" +
+                            "-老婆\n" +
+                            "-女仆\n" +
+                            "-魅魔\n" +
+                            "-美少女\n" +
+                            "-贴吧老哥\n" +
+                            "-傲娇猫娘\n" +
+                            "ps:只有群主和管理员才可以切换角色哦~"
                     ).build();
             bot.sendGroupMsg(event.getGroupId(), msg, false);
             return ReturnType.BLOCK_TRUE();
