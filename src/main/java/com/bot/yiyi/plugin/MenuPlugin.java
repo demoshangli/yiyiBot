@@ -80,7 +80,8 @@ public class MenuPlugin extends BotPlugin {
                             "\n-女仆" +
                             "\n-魅魔" +
                             "\n-美少女" +
-                            "\n-攻击" +
+                            "\n-贴吧老哥" +
+                            "\n-傲娇猫娘" +
                             "\nps:只有群主和管理员才可以切换角色哦~"
                     ).build();
             bot.sendGroupMsg(event.getGroupId(), msg, false);

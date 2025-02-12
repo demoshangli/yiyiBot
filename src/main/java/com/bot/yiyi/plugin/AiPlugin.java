@@ -14,17 +14,11 @@ import com.mikuac.shiro.dto.action.common.ActionData;
 import com.mikuac.shiro.dto.action.response.GroupMemberInfoResp;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.ai.chat.messages.UserMessage;
-import org.springframework.ai.chat.model.ChatResponse;
-import org.springframework.ai.chat.prompt.ChatOptions;
-import org.springframework.ai.chat.prompt.Prompt;
-import org.springframework.ai.model.Media;
-import org.springframework.ai.openai.OpenAiChatOptions;
-import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.util.MimeType;
-import org.springframework.util.MimeTypeUtils;
+import reactor.core.publisher.Flux;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,9 +47,9 @@ public class AiPlugin extends BotPlugin {
     @Override
     public int onGroupMessage(Bot bot, GroupMessageEvent event) {
         if (AtUtil.isAt(bot.getLoginInfo().getData(), event)) {
-            if (event.getMessage().contains("切换角色")) {
+            if (event.getMessage().contains("切换角色") || event.getMessage().contains("当前角色")) {
                 String role = bot.getGroupMemberInfo(event.getGroupId(), event.getUserId(), true).getData().getRole();
-                if (Objects.equals(event.getUserId(), botConfig.getQq()) || role.equals("owner") || role.equals("admin")) {
+                if (Objects.equals(event.getUserId(), botConfig.getOwnerQQ()) || role.equals("owner") || role.equals("admin")) {
                     if (event.getMessage().contains("切换角色默认")) {
                         aiMapper.updateRole(event.getGroupId(), 0);
                         bot.sendGroupMsg(event.getGroupId(), "依依已经切换到默认啦。", true);
@@ -72,13 +66,17 @@ public class AiPlugin extends BotPlugin {
                         aiMapper.updateRole(event.getGroupId(), 3);
                         bot.sendGroupMsg(event.getGroupId(), "依依已经切换到魅魔啦。", true);
                         return ReturnType.BLOCK_FALSE();
-                    } else if (event.getMessage().contains("切换角色攻击")) {
+                    } else if (event.getMessage().contains("切换角色贴吧老哥")) {
                         aiMapper.updateRole(event.getGroupId(), 4);
                         bot.sendGroupMsg(event.getGroupId(), "依依已经切换到攻击啦。", true);
                         return ReturnType.BLOCK_FALSE();
                     } else if (event.getMessage().contains("切换角色美少女")) {
                         aiMapper.updateRole(event.getGroupId(), 5);
                         bot.sendGroupMsg(event.getGroupId(), "依依已经切换到美少女啦。", true);
+                        return ReturnType.BLOCK_FALSE();
+                    } else if (event.getMessage().contains("切换角色傲娇猫娘")) {
+                        aiMapper.updateRole(event.getGroupId(), 6);
+                        bot.sendGroupMsg(event.getGroupId(), "依依已经切换到傲娇猫娘啦。", true);
                         return ReturnType.BLOCK_FALSE();
                     } else if (event.getMessage().contains("当前角色")) {
                         int roleType = aiMapper.selectRole(event.getGroupId());
@@ -96,10 +94,13 @@ public class AiPlugin extends BotPlugin {
                                 bot.sendGroupMsg(event.getGroupId(), "当前角色为魅魔。", true);
                                 break;
                             case 4:
-                                bot.sendGroupMsg(event.getGroupId(), "当前角色为攻击。", true);
+                                bot.sendGroupMsg(event.getGroupId(), "当前角色为贴吧老哥。", true);
                                 break;
                             case 5:
                                 bot.sendGroupMsg(event.getGroupId(), "当前角色为美少女。", true);
+                                break;
+                            case 6:
+                                bot.sendGroupMsg(event.getGroupId(), "当前角色为傲娇猫娘。", true);
                                 break;
                         }
                         return ReturnType.BLOCK_FALSE();
@@ -129,12 +130,13 @@ public class AiPlugin extends BotPlugin {
 //                }
                 } else {
                     String msg = MsgUtils.builder().at(event.getUserId()).text("只有群主、管理员才能切换依依的角色哦。").build();
-                    bot.sendGroupMsg(event.getGroupId(), msg, true);
+                    bot.sendGroupMsg(event.getGroupId(), msg, false);
                     return ReturnType.BLOCK_FALSE();
                 }
             }
             if (ReturnType.getMatch()) {
-                Pattern pattern = Pattern.compile("\\[CQ:at,qq=(\\d+)\\]");
+                event.setMessage(event.getMessage().replaceAll("\\[CQ:reply,id=\\d+\\]", "").trim());
+                Pattern pattern = Pattern.compile("\\[CQ:at,qq=(\\d+)]");
                 Matcher matcher = pattern.matcher(event.getMessage());
                 List<String> qqList = new ArrayList<>();
 
@@ -145,14 +147,14 @@ public class AiPlugin extends BotPlugin {
                 if (!qqList.isEmpty()) {
                     for (String qq : qqList) {
                         if (qq.equals(String.valueOf(bot.getSelfId()))) {
-                            event.setMessage(event.getMessage().replaceAll(atBot, "依依(你的名字,可以忽略)"));
+                            event.setMessage(event.getMessage().replaceAll(atBot, ""));
                         } else {
                             ActionData<GroupMemberInfoResp> groupMemberInfo = bot.getGroupMemberInfo(event.getGroupId(), Long.parseLong(qq), false);
                             event.setMessage(event.getMessage().replaceAll("[CQ:at,qq=" + qq + "]", " " + groupMemberInfo.getData().getCard() + "(群友的名字) "));
                         }
                     }
                 }
-                String context = "";
+                Flux<String> context = null;
                 int roleType = aiMapper.selectRole(event.getGroupId());
                 switch (roleType) {
                     case 0:
@@ -173,6 +175,9 @@ public class AiPlugin extends BotPlugin {
                     case 5:
                         updateRole(Role.GIRL);
                         break;
+                    case 6:
+                        updateRole(Role.CAT);
+                        break;
                 }
                 pattern = Pattern.compile("^(.*?)(\\[CQ:image,[^]]*?url=([^,\\]]+)])(.*)?");
                 matcher = pattern.matcher(event.getMessage());
@@ -184,13 +189,23 @@ public class AiPlugin extends BotPlugin {
 //                    UserMessage userMessage = new UserMessage(beforeText + afterText, List.of(new Media(new MimeType(), url)));
 //                    ChatResponse response = chatClient.call(new Prompt(userMessage));
                     } else {
-                        context = chatClient.prompt().user(beforeText + afterText).call().content();
+                        context = getContext(beforeText + afterText);
                     }
                 } else {
-                    context = chatClient.prompt().user(event.getMessage()).call().content();
+                    context = getContext(event.getMessage());
                 }
-                String msg = MsgUtils.builder().reply(event.getMessageId()).at(event.getUserId()).text(context).build();
-                bot.sendGroupMsg(event.getGroupId(), msg, false);
+                if (context != null) {
+                    context.collectList()
+                            .map(list -> String.join(" ", list)) // 转换为 String
+                            .subscribe(message -> {
+                                String msg = MsgUtils.builder()
+                                        .reply(event.getMessageId())
+                                        .at(event.getUserId())
+                                        .text(message.replaceAll("\\s*", ""))
+                                        .build();
+                                bot.sendGroupMsg(event.getGroupId(), msg, false);
+                            });
+                }
             }
         }
         return MESSAGE_BLOCK;
@@ -214,5 +229,10 @@ public class AiPlugin extends BotPlugin {
         this.chatClient = builder.defaultSystem(AIConfig.getRole())
 //                .defaultOptions(ChatOptions.builder().model(AIConfig.getModel()).build())
                 .build();
+    }
+
+    @Retryable(retryFor = Exception.class, maxAttempts = 5, backoff = @Backoff(delay = 3000, multiplier = 0))
+    private Flux<String> getContext(String message) {
+        return chatClient.prompt().user(message).stream().content();
     }
 }

@@ -30,14 +30,13 @@ spring:
 #      api-key: sk-fe29bd4c8b1e41089b946317184954ea
 #      base-url: https://api.deepseek.com
       api-key: sk-jyeqqjjeeavcifoigfijvdgwydyvbtvzuemtjwnntxwlrfsa
-      base-url: https://api.siliconflow.cn/
+      base-url: https://api.siliconflow.com/
       chat:
         options:
 #          model: deepseek-reasoner
-          model: deepseek-ai/DeepSeek-R1
+          model: Pro/deepseek-ai/DeepSeek-R1
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.bot.yiyi.pojo
 bot:
-  owner:
-    qq: 2376539644
+  ownerQQ: 2376539644
