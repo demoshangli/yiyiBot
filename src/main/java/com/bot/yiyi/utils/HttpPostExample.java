@@ -2,25 +2,30 @@ package com.bot.yiyi.utils;
 
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URL;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 
 public class HttpPostExample {
     public static String crazy() {
-        // 目标URL
         String url = "https://whiteverse.com/scripts/php/crazylg.php";
 
-        // 请求参数
         Random random = new Random();
         int num = random.nextInt(34) + 1;
         String id = String.valueOf(num); // 示例ID参数
 
-        // 构造HTTP请求
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(url))
@@ -29,58 +34,160 @@ public class HttpPostExample {
                 .build();
 
         try {
-            // 发送请求并接收响应
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // 将响应解析为JSONArray
             JSONArray jsonArray = JSON.parseArray(response.body());
-            // 遍历响应数组
             for (Object obj : jsonArray) {
                 return String.valueOf(obj);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "我现在不想发电";
+        return null;
     }
 
-    public static String rainbow(String name) {
-        // 目标URL
-        String url = "https://tools.kalvinbg.cn/txt/rainbowfart";
-
-        // 请求参数
-        Random random = new Random();
-        int num = random.nextInt(100000) + 1;
-        String value = String.valueOf(num); // 示例ID参数
-
-        // 构造带查询参数的 URL
-        String urlWithParams = String.format("%s?random=%s&name=%s", url, value, name);
-
-        // 创建 HttpClient 和 GET 请求
-        HttpClient client = HttpClient.newHttpClient();
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(urlWithParams)) // URL 中已包含查询参数
-                .GET() // 使用 GET 方法
-                .build();
-
+    public static String getAncientPoetry() {
         try {
-            // 发送请求并接收响应
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-            System.out.println("原始响应: " + response.body());
-            // 将响应解析为JSONArray
-//            JSONArray jsonArray = JSON.parseArray(response.body());
-//            // 遍历响应数组
-//            for (Object obj : jsonArray) {
-//                return String.valueOf(obj);
-//            }
+            URL url = new URL("https://api.apiopen.top/api/sentences");
+
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+            conn.setRequestProperty("Accept", "application/json");
+
+            if (conn.getResponseCode() == 200) {
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(conn.getInputStream())
+                );
+                StringBuilder response = new StringBuilder();
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    response.append(line);
+                }
+                reader.close();
+
+                JSONObject json = JSONObject.parseObject(response.toString());
+                if (json.getIntValue("code") == 200) {
+                    JSONObject result = json.getJSONObject("result");
+
+                    String name = result.getString("name");
+                    String from = result.getString("from");
+                    return name + "\n——" + from;
+                } else {
+                    System.out.println("API 返回错误: " + json.getString("message"));
+                }
+            } else {
+                System.out.println("HTTP 请求失败: " + conn.getResponseCode());
+            }
+
+            conn.disconnect();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return "我现在不想发电";
+        return null;
+    }
+
+    public static String getRandomOne() {
+        try {
+            URL url = new URL("https://api.oick.cn/yiyan/api.php");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+
+            // 2. 处理响应
+            if (conn.getResponseCode() == 200) {
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(conn.getInputStream(), "UTF-8"));
+                String response = reader.readLine(); // 直接读取单行文本
+                reader.close();
+
+                return response;
+            } else {
+                System.out.println("请求失败，状态码: " + conn.getResponseCode());
+            }
+
+            conn.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String society() {
+        try {
+            URL url = new URL("https://api.oick.cn/yulu/api.php");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+
+            // 2. 处理响应
+            if (conn.getResponseCode() == 200) {
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(conn.getInputStream(), "UTF-8"));
+                String response = reader.readLine(); // 直接读取单行文本
+                reader.close();
+
+                return response;
+            } else {
+                System.out.println("请求失败，状态码: " + conn.getResponseCode());
+            }
+
+            conn.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String loveDog() {
+        try {
+            URL url = new URL("https://api.oick.cn/dog/api.php");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+
+            // 2. 处理响应
+            if (conn.getResponseCode() == 200) {
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(conn.getInputStream(), "UTF-8"));
+                String response = reader.readLine(); // 直接读取单行文本
+                reader.close();
+
+                return response;
+            } else {
+                System.out.println("请求失败，状态码: " + conn.getResponseCode());
+            }
+
+            conn.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public static String duTang() {
+        try {
+            URL url = new URL("https://api.oick.cn/dutang/api.php");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("GET");
+
+            // 2. 处理响应
+            if (conn.getResponseCode() == 200) {
+                BufferedReader reader = new BufferedReader(
+                        new InputStreamReader(conn.getInputStream(), "UTF-8"));
+                String response = reader.readLine(); // 直接读取单行文本
+                reader.close();
+
+                return response;
+            } else {
+                System.out.println("请求失败，状态码: " + conn.getResponseCode());
+            }
+
+            conn.disconnect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public static String joinUrl(String baseUrl, String path) {
-        // 确保 baseUrl 末尾有 '/'，确保 path 开头没有 '/'
         if (!baseUrl.endsWith("/")) {
             baseUrl += "/";
         }
@@ -88,5 +195,38 @@ public class HttpPostExample {
             path = path.substring(1);
         }
         return baseUrl + path;
+    }
+
+    public static String getRandomPic() {
+        String apiUrl = "https://api.apiopen.top/api/getImages?page=" + 1 + "&size=" + 1 + "&type=comic";
+
+        HttpClient client = HttpClient.newHttpClient();
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create(apiUrl))
+                .GET()
+                .build();
+
+        HttpResponse<String> response = null;
+        try {
+            response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        } catch (IOException | InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+
+        if (response.statusCode() == 200) {
+            JSONObject jsonObject = JSON.parseObject(response.body());
+            if (jsonObject.getInteger("code") == 200) {
+                JSONObject result = jsonObject.getJSONObject("result");
+                JSONArray list = result.getJSONArray("list");
+
+                List<String> urls = new ArrayList<>();
+                for (int i = 0; i < list.size(); i++) {
+                    JSONObject item = list.getJSONObject(i);
+                    urls.add(item.getString("url"));
+                }
+                return urls.get(0);
+            }
+        }
+        return null;
     }
 }
