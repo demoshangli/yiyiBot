@@ -1,14 +1,15 @@
 package com.bot.yiyi.mapper;
 
+import com.bot.yiyi.Pojo.User;
 import com.bot.yiyi.Pojo.Wife;
 import org.apache.ibatis.annotations.Param;
 
 public interface WifeMapper {
     void marry(@Param("userId") Long userId, @Param("wife") Long wifeUserId);
 
-    String isWife(Long userId);
+    Long isWife(Long userId);
 
-    String isHusband(Long userId);
+    Long isHusband(Long userId);
 
     Wife selectWife(Long userId);
 
@@ -17,4 +18,10 @@ public interface WifeMapper {
     String SelectConfession(int i);
 
     void deleteWife(long l);
+
+    Wife selectInfo(Long userId);
+
+    void updateWifeResponsive(@Param("userId") Long userId, @Param("responsive") int responsive);
+
+    void updateHusbandResponsive(@Param("userId") Long userId, @Param("responsive") int responsive);
 }

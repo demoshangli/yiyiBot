@@ -14,8 +14,8 @@ import java.time.LocalDateTime;
 public class Wife {
 
     private String id;
-    private String husband;
-    private String wife;
+    private Long husband;
+    private Long wife;
     private Integer wifeFavorAbility;
     private Integer husbandFavorAbility;
     private LocalDateTime MarryTime;

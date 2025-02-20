@@ -9,28 +9,30 @@ shiro:
     - com.bot.yiyi.plugin.RegisterPlugin
     - com.bot.yiyi.plugin.ServerPlugin
     - com.bot.yiyi.plugin.MenuPlugin
-    - com.bot.yiyi.plugin.CrazyPlugin
+    - com.bot.yiyi.plugin.soundPlugin
+    - com.bot.yiyi.plugin.ApiPlugin
     - com.bot.yiyi.plugin.ImageProcessorPlugin
     - com.bot.yiyi.plugin.MoneyPlugin
     - com.bot.yiyi.plugin.WifePlugin
+    - com.bot.yiyi.plugin.ResponsivePlugin
     - com.bot.yiyi.plugin.AiPlugin
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/bot?useUnicode=true&characterEncoding=utf-8
+    url: jdbc:mysql://wuyao.love:3306/bot?useUnicode=true&characterEncoding=utf-8
     username: root
-    password: root
+    password: wanan9644
     driver-class-name: com.mysql.cj.jdbc.Driver
   data:
     redis:
-      host: localhost
+      host: wuyao.love
       port: 6379
-      password: redis
+      password: Wanan9644
       database: 0
   ai:
     openai:
-#      api-key: key
+#      api-key: sk-fe29bd4c8b1e41089b946317184954ea
 #      base-url: https://api.deepseek.com
-      api-key: key
+      api-key: sk-jyeqqjjeeavcifoigfijvdgwydyvbtvzuemtjwnntxwlrfsa
       base-url: https://api.siliconflow.com/
       chat:
         options:
@@ -40,4 +42,4 @@ mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.bot.yiyi.pojo
 bot:
-  ownerQQ: qq
+  ownerQQ: 2376539644

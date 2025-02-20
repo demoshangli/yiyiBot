@@ -6,15 +6,16 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.Map;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 public class User {
-    private String id;
+    private Long id;
     private int money;
-    private LocalDate lastCheckTime;
+    private int isCheckIn;
     private int bank;
-    private String lotteryTime;
+    private int lotteryTime;
 }

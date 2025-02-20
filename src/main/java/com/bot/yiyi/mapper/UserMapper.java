@@ -4,6 +4,8 @@ import com.bot.yiyi.Pojo.User;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 @Mapper
 public interface UserMapper {
 
@@ -18,4 +20,10 @@ public interface UserMapper {
     Integer selectGroupIsHave(Long groupId);
 
     void addGroup(Long groupId);
+
+    int selectTime(Long userId);
+
+    List<User> selectAllUser();
+
+    void updateDay(@Param("Check") int checkIn, @Param("lotteryTime") int lotteryTime, @Param("money") int money, @Param("userId") Long userId);
 }

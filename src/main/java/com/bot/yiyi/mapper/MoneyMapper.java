@@ -14,9 +14,11 @@ public interface MoneyMapper {
 
     void updateMoney(@Param("userId") Long userId, @Param("money") int money);
 
-    void checkIn(@Param("userId") Long userId, @Param("money") int money, @Param("today") LocalDate today);
+    int selectMoney(@Param("userId") Long userId);
 
-    void updateLotteryTime(@Param("userId") Long userId, @Param("lotteryTime") String s);
+    void checkIn(@Param("userId") Long userId, @Param("money") int money, @Param("today") int today);
+
+    void updateLotteryTime(@Param("userId") Long userId, @Param("lotteryTime") int s);
 
     List<User> selectMAX();
 

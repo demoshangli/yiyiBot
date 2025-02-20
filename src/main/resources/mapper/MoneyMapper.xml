@@ -6,7 +6,7 @@
         update user set money = #{money} where id = #{userId}
     </insert>
     <update id="checkIn">
-        update user set money = money + #{money}, last_check_time = #{today} where id = #{userId}
+        update user set money = money + #{money}, is_check_in = #{today} where id = #{userId}
     </update>
     <update id="updateLotteryTime">
         update user set lottery_time = #{lotteryTime} where id = #{userId}
@@ -38,5 +38,8 @@
         <![CDATA[select u.id, u.money + u.bank as money from user u
                 join group_user_info g on u.id = g.user_id and g.group_id = #{groupId}
                 where u.money + u.bank < 0 order by u.money + u.bank asc limit 10]]>
+    </select>
+    <select id="selectMoney" resultType="java.lang.Integer">
+        select money from user where id = #{userId}
     </select>
 </mapper>

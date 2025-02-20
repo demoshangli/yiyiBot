@@ -6,13 +6,19 @@
     <insert id="marry">
         insert into wife_list values (0,#{userId},#{wife},0,0,now())
     </insert>
+    <update id="updateWifeResponsive">
+        update wife_list set wife_favor_ability = wife_favor_ability + #{responsive} where husband = #{userId}
+    </update>
+    <update id="updateHusbandResponsive">
+        update wife_list set husband_favor_ability = husband_favor_ability + #{responsive} where wife = #{userId}
+    </update>
     <delete id="deleteWife">
         delete from wife_list where husband = #{userId} or wife = #{userId}
     </delete>
-    <select id="isWife" resultType="java.lang.String">
+    <select id="isWife" resultType="java.lang.Long">
         select husband from wife_list where wife = #{userId}
     </select>
-    <select id="isHusband" resultType="java.lang.String">
+    <select id="isHusband" resultType="java.lang.Long">
         select wife from wife_list where husband = #{userId}
     </select>
     <select id="selectWife" resultType="com.bot.yiyi.Pojo.Wife">
@@ -23,5 +29,8 @@
     </select>
     <select id="SelectConfession" resultType="java.lang.String">
         select text from confession_list where id = #{id}
+    </select>
+    <select id="selectInfo" resultType="com.bot.yiyi.Pojo.Wife">
+        select id,wife, husband, wife_favor_ability as wifeFavorAbility, husband_favor_ability as husbandFavorAbility from wife_list where wife = #{userId} or husband = #{userId}
     </select>
 </mapper>
