@@ -5,7 +5,13 @@
     <update id="updateRole">
         update group_info set ai_role = #{role} where group_id = #{groupId}
     </update>
+    <update id="updateUserRole">
+        update user set ai_role = #{role} where id = #{userId}
+    </update>
     <select id="selectRole" resultType="java.lang.Integer">
         select ai_role from group_info where group_id = #{groupId}
+    </select>
+    <select id="selectUserRole" resultType="java.lang.Integer">
+        select ai_role from user where id = #{userId}
     </select>
 </mapper>
