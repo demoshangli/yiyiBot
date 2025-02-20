@@ -12,11 +12,12 @@ import com.mikuac.shiro.dto.action.response.StrangerInfoResp;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
+import static com.bot.yiyi.plugin.RegisterPlugin.atBot;
 
 @Component
-public class CrazyPlugin extends BotPlugin {
+public class ApiPlugin extends BotPlugin {
 
 //    @Override
 //    public int onPrivateMessage(Bot bot, PrivateMessageEvent event) {
@@ -34,7 +35,9 @@ public class CrazyPlugin extends BotPlugin {
 
     @Override
     public int onGroupMessage(Bot bot, GroupMessageEvent event) {
-        System.out.println(event.getMessage());
+        if (event.getGroupId() == 176282339L) {
+            return ReturnType.IGNORE_TRUE();
+        }
         LoginInfoResp data = bot.getLoginInfo().getData();
         StrangerInfoResp strangerInfo = bot.getStrangerInfo(event.getUserId(), true).getData();
         List<String> msgList = new ArrayList<>();
@@ -79,6 +82,48 @@ public class CrazyPlugin extends BotPlugin {
                 bot.sendGroupMsg(event.getGroupId(), msg, false);
                 return ReturnType.IGNORE_FALSE();
             }
+        }
+        Set<String> apiSet = new HashSet<>(Arrays.asList("随机古诗", atBot + "随机古诗"));
+        if (apiSet.contains(event.getMessage())) {
+            String s = HttpPostExample.getAncientPoetry();
+            String msg = MsgUtils.builder().at(event.getUserId()).text(s).build();
+            bot.sendGroupMsg(event.getGroupId(), msg, false);
+            return ReturnType.IGNORE_FALSE();
+        }
+        apiSet = new HashSet<>(Arrays.asList("随机一言", atBot + "随机一言"));
+        if (apiSet.contains(event.getMessage())) {
+            String s = HttpPostExample.getRandomOne();
+            String msg = MsgUtils.builder().at(event.getUserId()).text(s).build();
+            bot.sendGroupMsg(event.getGroupId(), msg, false);
+            return ReturnType.IGNORE_FALSE();
+        }
+        apiSet = new HashSet<>(Arrays.asList("随机语录", atBot + "随机语录"));
+        if (apiSet.contains(event.getMessage())) {
+            String s = HttpPostExample.society();
+            String msg = MsgUtils.builder().at(event.getUserId()).text(s).build();
+            bot.sendGroupMsg(event.getGroupId(), msg, false);
+            return ReturnType.IGNORE_FALSE();
+        }
+        apiSet = new HashSet<>(Arrays.asList("毒鸡汤", atBot + "毒鸡汤"));
+        if (apiSet.contains(event.getMessage())) {
+            String s = HttpPostExample.duTang();
+            String msg = MsgUtils.builder().at(event.getUserId()).text(s).build();
+            bot.sendGroupMsg(event.getGroupId(), msg, false);
+            return ReturnType.IGNORE_FALSE();
+        }
+        apiSet = new HashSet<>(Arrays.asList("舔狗日记", atBot + "舔狗日记"));
+        if (apiSet.contains(event.getMessage())) {
+            String s = HttpPostExample.loveDog();
+            msgList.add(s);
+            bot.sendGroupForwardMsg(event.getGroupId(), AtUtil.toForward(strangerInfo.getNickname(), event.getUserId(), msgList));
+            return ReturnType.IGNORE_FALSE();
+        }
+        apiSet = new HashSet<>(Arrays.asList("随机图片", atBot + "随机图片"));
+        if (apiSet.contains(event.getMessage())) {
+            String s = HttpPostExample.getRandomPic();
+            String msg = MsgUtils.builder().img(OneBotMedia.builder().file(s)).build();
+            bot.sendGroupMsg(event.getGroupId(), msg, false);
+            return ReturnType.IGNORE_FALSE();
         }
         return ReturnType.IGNORE_TRUE();
     }
