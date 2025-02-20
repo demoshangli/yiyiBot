@@ -2,6 +2,7 @@ package com.bot.yiyi.plugin;
 
 import com.bot.yiyi.Pojo.ReturnType;
 import com.mikuac.shiro.common.utils.MsgUtils;
+import com.mikuac.shiro.common.utils.OneBotMedia;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.core.BotPlugin;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
@@ -55,10 +56,9 @@ public class ImageProcessorPlugin extends BotPlugin {
             BufferedImage original = ImageIO.read(tempInput);
             BufferedImage processed = processImage(original);
 
-            tempOutput = File.createTempFile("output-", ".jpg");
+            tempOutput = File.createTempFile("output-", ".jpg", new File("/usr/local/nginx/html"));
             ImageIO.write(processed, "jpg", tempOutput);
-
-            String msg = MsgUtils.builder().img(tempOutput.getAbsolutePath()).build();
+            String msg = MsgUtils.builder().img(OneBotMedia.builder().file("https://wuyao.love/" + tempOutput.getName())).build();
             bot.sendGroupMsg(event.getGroupId(), msg, false);
 
         } catch (IOException e) {
@@ -105,13 +105,18 @@ public class ImageProcessorPlugin extends BotPlugin {
     }
 
     private static void drawName(Graphics2D g, String text, int x, int y) {
-        int size = 100;
-        if (text.length() > 8) {
-            size = 80;
+        int size = text.length() > 8 ? 80 : 100;
+        try {
+            Font customFont = Font.createFont(Font.TRUETYPE_FONT,
+                            new File("/usr/share/fonts/chinese/wryh/msyhbd.ttf"))
+                    .deriveFont(Font.BOLD, size);
+            g.setFont(customFont);
+        } catch (Exception e) {
+            // 回退到系统支持字体
+            g.setFont(new Font("SansSerif", Font.BOLD, size));
         }
-        Font font = new Font("Microsoft YaHei", Font.BOLD, size);
-        g.setFont(font);
 
+        // 描边效果
         g.setColor(Color.WHITE);
         g.setStroke(new BasicStroke(4));
         for (int i = -1; i <= 1; i++) {
@@ -120,6 +125,7 @@ public class ImageProcessorPlugin extends BotPlugin {
             }
         }
 
+        // 主文字颜色
         g.setColor(colors[random.nextInt(colors.length)]);
         g.drawString(text, x, y);
     }
