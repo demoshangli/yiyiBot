@@ -76,7 +76,7 @@ public class MenuPlugin extends BotPlugin {
                 bot.sendGroupForwardMsg(event.getGroupId(), AtUtil.toForward(bot.getLoginInfo().getData().getNickname(), bot.getLoginInfo().getData().getUserId(), menu));
             else
                 bot.sendPrivateForwardMsg(event.getUserId(), AtUtil.toForward(bot.getLoginInfo().getData().getNickname(), bot.getLoginInfo().getData().getUserId(), menu));
-            return ReturnType.BLOCK_FALSE();
+            return ReturnType.IGNORE_TRUE();
         }
         return ReturnType.IGNORE_TRUE();
     }
