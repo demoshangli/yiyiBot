@@ -24,7 +24,7 @@ public class AtUtil {
 
     public static boolean onlyAt(LoginInfoResp data, GroupMessageEvent event) {
         String botQQ = data.getUserId().toString();
-        return event.getMessage().equals("[CQ:at,qq=" + botQQ + "]");
+        return event.getMessage().equals("[CQ:at,qq=" + botQQ + "] ") || event.getMessage().equals("[CQ:at,qq=" + botQQ + "]");
     }
 
     public static List<Map<String, Object>> toForward(String name, Long nick, List<String> msgList) {
@@ -58,5 +58,23 @@ public class AtUtil {
         }
 
         return qqList;
+    }
+
+    public static String parseCQCode(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+
+        // 正则匹配 &#91; 任意内容 &#93; 结构
+        Pattern pattern = Pattern.compile("&#91;(.*?)&#93;");
+        Matcher matcher = pattern.matcher(input);
+
+        // 替换匹配到的内容
+        String output = matcher.replaceAll("[$1]");
+
+        // 处理 &#44; 为 ","
+        output = output.replaceAll("&#44;", ",");
+
+        return output;
     }
 }

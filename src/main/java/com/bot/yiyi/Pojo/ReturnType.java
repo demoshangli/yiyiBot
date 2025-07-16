@@ -1,32 +1,28 @@
 package com.bot.yiyi.Pojo;
 
 import com.mikuac.shiro.core.BotPlugin;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.stereotype.Component;
 
+@Component
 public class ReturnType extends BotPlugin {
 
-    private static Boolean match;
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
 
-    public static Boolean getMatch() {
-        return match;
+    public Boolean getMatch(int msgId) {
+        return redisTemplate.hasKey("AIMsg:" + msgId);
     }
 
-    public static int IGNORE_TRUE() {
-        match = true;
+    public int IGNORE_TRUE(int msgId) {
+        redisTemplate.opsForValue().set("AIMsg:" + msgId, true);
         return MESSAGE_IGNORE;
     }
 
-    public static int BLOCK_TRUE() {
-        match = true;
-        return MESSAGE_BLOCK;
-    }
-
-    public static int IGNORE_FALSE() {
-        match = false;
+    public int IGNORE_FALSE(int msgId) {
+        redisTemplate.opsForValue().set("AIMsg:" + msgId, false);
         return MESSAGE_IGNORE;
-    }
-
-    public static int BLOCK_FALSE() {
-        match = false;
-        return MESSAGE_BLOCK;
     }
 }
+

@@ -4,6 +4,8 @@ import com.bot.yiyi.Pojo.ReturnType;
 import com.bot.yiyi.Pojo.Wife;
 import com.bot.yiyi.mapper.MoneyMapper;
 import com.bot.yiyi.mapper.WifeMapper;
+import com.bot.yiyi.utils.AtUtil;
+import com.bot.yiyi.utils.LimitUtil;
 import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.core.BotPlugin;
@@ -21,235 +23,268 @@ import java.util.regex.Pattern;
 @Component
 public class ResponsivePlugin extends BotPlugin {
 
+    private static final Pattern EMBRACE_PATTERN = Pattern.compile("抱抱\\[CQ:at,qq=(\\d+)]|\\[CQ:at,qq=(\\d+)]\\s*抱抱");
+    private static final Pattern KISS_PATTERN = Pattern.compile("亲亲\\[CQ:at,qq=(\\d+)]|\\[CQ:at,qq=(\\d+)]\\s*亲亲");
+
     @Autowired
     private WifeMapper wifeMapper;
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     @Autowired
     private MoneyMapper moneyMapper;
+    @Autowired
+    private LimitUtil limitUtil;
+    @Autowired
+    private ReturnType returnType;
+
+    private final Random random = new Random();
 
     @Override
     public int onGroupMessage(Bot bot, GroupMessageEvent event) {
         if (event.getGroupId() == 176282339L) {
-            return ReturnType.IGNORE_TRUE();
+            return returnType.IGNORE_TRUE(event.getMessageId());
         }
-        Random random = new Random();
-        Pattern pattern = Pattern.compile("抱抱\\[CQ:at,qq=(\\d+)]|\\[CQ:at,qq=(\\d+)]\\s*抱抱");
-        Matcher matcher = pattern.matcher(event.getMessage());
-        if (matcher.matches()) {
-            int responsive = random.nextInt(20) + 1;
-            long qq = Long.parseLong(matcher.group(1) != null ? matcher.group(1) : matcher.group(2));
-            if (Objects.equals(wifeMapper.isWife(event.getUserId()), qq)) {
-                if (Boolean.TRUE.equals(redisTemplate.hasKey("Embrace" + event.getUserId()))) {
-                    Long type = (Long) redisTemplate.opsForValue().get("Embrace" + event.getUserId());
-                    if (type == qq) {
-                        String msg = MsgUtils.builder().at(event.getUserId()).text("你已经抱过你的老公了。")
-                                .text("\n过一会再来吧。").build();
-                        bot.sendGroupMsg(event.getGroupId(), msg, false);
-                        return ReturnType.IGNORE_FALSE();
-                    } else {
-                        wifeMapper.updateHusbandResponsive(event.getUserId(), -responsive);
-                        String msg = MsgUtils.builder().at(event.getUserId()).text("你已经抱过别人了!")
-                                .text("\n你的老公给了你一拳!")
-                                .text("你老公对你的好感度-" + responsive).build();
-                        bot.sendGroupMsg(event.getGroupId(), msg, false);
-                        return ReturnType.IGNORE_FALSE();
-                    }
-                }
-                wifeMapper.updateHusbandResponsive(event.getUserId(), responsive);
-                redisTemplate.opsForValue().set("Embrace"+ event.getUserId(), qq, 120, TimeUnit.MINUTES);
-                String msg = MsgUtils.builder().at(event.getUserId()).text("你抱了抱你的老公。").text("\n")
-                        .text("你老公对你的好感度+" + responsive).build();
-                bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return ReturnType.IGNORE_FALSE();
-            } else if (Objects.equals(wifeMapper.isHusband(event.getUserId()), qq)) {
-                if (Boolean.TRUE.equals(redisTemplate.hasKey("Embrace" + event.getUserId()))) {
-                    Long type = (Long) redisTemplate.opsForValue().get("Embrace" + event.getUserId());
-                    if (type == qq) {
-                        String msg = MsgUtils.builder().at(event.getUserId()).text("你已经抱过你的老婆了。")
-                                .text("\n过一会再来吧。").build();
-                        bot.sendGroupMsg(event.getGroupId(), msg, false);
-                        return ReturnType.IGNORE_FALSE();
-                    } else {
-                        wifeMapper.updateWifeResponsive(event.getUserId(), -responsive);
-                        String msg = MsgUtils.builder().at(event.getUserId()).text("你已经抱过别人了!")
-                                .text("\n你的老婆给了你一拳!")
-                                .text("你老婆对你的好感度-" + responsive).build();
-                        bot.sendGroupMsg(event.getGroupId(), msg, false);
-                        return ReturnType.IGNORE_FALSE();
-                    }
-                }
-                wifeMapper.updateWifeResponsive(event.getUserId(), responsive);
-                redisTemplate.opsForValue().set("Embrace"+ event.getUserId(), qq, 120, TimeUnit.MINUTES);
-                String msg = MsgUtils.builder().at(event.getUserId()).text("你抱了抱你的老婆。").text("\n")
-                        .text("你老婆对你的好感度+" + responsive).build();
-                bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return ReturnType.IGNORE_FALSE();
-            } else if (wifeMapper.isWife(event.getUserId()) != null){
-                if (Boolean.TRUE.equals(redisTemplate.hasKey("Embrace" + event.getUserId()))) {
-                        wifeMapper.updateHusbandResponsive(event.getUserId(), -(responsive * 2));
-                        String msg = MsgUtils.builder().at(event.getUserId()).text("你还想抱别人!")
-                                .text("你老公对你的好感度-" + (responsive * 2)).build();
-                        bot.sendGroupMsg(event.getGroupId(), msg, false);
-                    return ReturnType.IGNORE_FALSE();
-                }
-                wifeMapper.updateHusbandResponsive(event.getUserId(), -responsive);
-                redisTemplate.opsForValue().set("Embrace"+ event.getUserId(), qq, 120, TimeUnit.MINUTES);
-                String msg = MsgUtils.builder().at(event.getUserId()).text("你抱了抱").at(qq).text("。\n")
-                        .text("你老公对你的好感度-" + responsive).build();
-                bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return ReturnType.IGNORE_FALSE();
-            } else if (wifeMapper.isHusband(event.getUserId()) != null){
-                if (Boolean.TRUE.equals(redisTemplate.hasKey("Embrace" + event.getUserId()))) {
-                    wifeMapper.updateWifeResponsive(event.getUserId(), -(responsive * 2));
-                    String msg = MsgUtils.builder().at(event.getUserId()).text("你还想抱别人!")
-                            .text("你老婆对你的好感度-" + (responsive * 2)).build();
-                    bot.sendGroupMsg(event.getGroupId(), msg, false);
-                    return ReturnType.IGNORE_FALSE();
-                }
-                wifeMapper.updateWifeResponsive(event.getUserId(), -responsive);
-                redisTemplate.opsForValue().set("Embrace"+ event.getUserId(), qq, 120, TimeUnit.MINUTES);
-                String msg = MsgUtils.builder().at(event.getUserId()).text("你抱了抱").at(qq).text("。\n")
-                        .text("你老婆对你的好感度-" + responsive).build();
-                bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return ReturnType.IGNORE_FALSE();
-            } else {
-                String msg = MsgUtils.builder().at(event.getUserId()).text("你抱了抱").at(qq).text("。\n")
-                        .text("什么都没有发生。").build();
-                bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return ReturnType.IGNORE_FALSE();
-            }
+        if (limitUtil.isLimit(event.getUserId())) {
+            return returnType.IGNORE_TRUE(event.getMessageId());
         }
-        pattern = Pattern.compile("亲亲\\[CQ:at,qq=(\\d+)]|\\[CQ:at,qq=(\\d+)]\\s*亲亲");
-        matcher = pattern.matcher(event.getMessage());
-        if (matcher.matches()) {
-            int responsive = random.nextInt(100) + 1;
-            long qq = Long.parseLong(matcher.group(1) != null ? matcher.group(1) : matcher.group(2));
-            if (Objects.equals(wifeMapper.isWife(event.getUserId()), qq)) {
-                Wife wife = wifeMapper.selectInfo(event.getUserId());
-                if (wife.getHusbandFavorAbility() <= 1000) {
-                    String msg = MsgUtils.builder().at(event.getUserId()).text("你的老公拒绝了你的亲亲。\n他对你的好感度到1000之后再来吧。").build();
-                    bot.sendGroupMsg(event.getGroupId(), msg, false);
-                    return ReturnType.IGNORE_FALSE();
-                }
-                if (Boolean.TRUE.equals(redisTemplate.hasKey("Kiss" + event.getUserId()))) {
-                    Long type = (Long) redisTemplate.opsForValue().get("Kiss" + event.getUserId());
-                    if (type == qq) {
-                        String msg = MsgUtils.builder().at(event.getUserId()).text("你已经亲过你的老公了。")
-                                .text("\n过一会再来吧。").build();
-                        bot.sendGroupMsg(event.getGroupId(), msg, false);
-                        return ReturnType.IGNORE_FALSE();
-                    } else {
-                        wifeMapper.updateHusbandResponsive(event.getUserId(), -responsive);
-                        String msg = MsgUtils.builder().at(event.getUserId()).text("你已经亲过别人了!")
-                                .text("\n你的老公给了你一拳!")
-                                .text("你老公对你的好感度-" + responsive).build();
-                        bot.sendGroupMsg(event.getGroupId(), msg, false);
-                        return ReturnType.IGNORE_FALSE();
-                    }
-                }
-                wifeMapper.updateHusbandResponsive(event.getUserId(), responsive);
-                redisTemplate.opsForValue().set("Kiss"+ event.getUserId(), qq, 6, TimeUnit.HOURS);
-                String msg = MsgUtils.builder().at(event.getUserId()).text("你亲了亲你的老公。").text("❤\n")
-                        .text("你老公对你的好感度+" + responsive).build();
-                bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return ReturnType.IGNORE_FALSE();
-            } else if (Objects.equals(wifeMapper.isHusband(event.getUserId()), qq)) {
-                Wife wife = wifeMapper.selectInfo(event.getUserId());
-                if (wife.getWifeFavorAbility() <= 1000) {
-                    String msg = MsgUtils.builder().at(event.getUserId()).text("你的老婆拒绝了你的亲亲。\n她对你的好感度到1000之后再来吧。").build();
-                    bot.sendGroupMsg(event.getGroupId(), msg, false);
-                    return ReturnType.IGNORE_FALSE();
-                }
-                if (Boolean.TRUE.equals(redisTemplate.hasKey("Kiss" + event.getUserId()))) {
-                    Long type = (Long) redisTemplate.opsForValue().get("Kiss" + event.getUserId());
-                    if (type == qq) {
-                        String msg = MsgUtils.builder().at(event.getUserId()).text("你已经亲过你的老婆了。")
-                                .text("\n过一会再来吧。").build();
-                        bot.sendGroupMsg(event.getGroupId(), msg, false);
-                        return ReturnType.IGNORE_FALSE();
-                    } else {
-                        wifeMapper.updateWifeResponsive(event.getUserId(), -responsive);
-                        String msg = MsgUtils.builder().at(event.getUserId()).text("你已经亲过别人了!")
-                                .text("\n你的老婆给了你一拳!")
-                                .text("你老婆对你的好感度-" + responsive).build();
-                        bot.sendGroupMsg(event.getGroupId(), msg, false);
-                        return ReturnType.IGNORE_FALSE();
-                    }
-                }
-                wifeMapper.updateWifeResponsive(event.getUserId(), responsive);
-                redisTemplate.opsForValue().set("Kiss"+ event.getUserId(), qq, 6, TimeUnit.HOURS);
-                String msg = MsgUtils.builder().at(event.getUserId()).text("你亲了亲你的老婆。").text("❤\n")
-                        .text("你老婆对你的好感度+" + responsive).build();
-                bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return ReturnType.IGNORE_FALSE();
-            } else if (wifeMapper.isWife(event.getUserId()) != null){
-                if (Boolean.TRUE.equals(redisTemplate.hasKey("Kiss" + event.getUserId()))) {
-                    wifeMapper.updateHusbandResponsive(event.getUserId(), -(responsive * 2));
-                    String msg = MsgUtils.builder().at(event.getUserId()).text("你还想亲别人!")
-                            .text("你老公对你的好感度-" + (responsive * 2)).build();
-                    bot.sendGroupMsg(event.getGroupId(), msg, false);
-                    return ReturnType.IGNORE_FALSE();
-                }
-                wifeMapper.updateHusbandResponsive(event.getUserId(), -responsive);
-                redisTemplate.opsForValue().set("Kiss"+ event.getUserId(), qq, 6, TimeUnit.HOURS);
-                String msg = MsgUtils.builder().at(event.getUserId()).text("你亲了亲").at(qq).text("。❤\n")
-                        .text("你老公对你的好感度-" + responsive).build();
-                bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return ReturnType.IGNORE_FALSE();
-            } else if (wifeMapper.isHusband(event.getUserId()) != null){
-                if (Boolean.TRUE.equals(redisTemplate.hasKey("Kiss" + event.getUserId()))) {
-                    wifeMapper.updateWifeResponsive(event.getUserId(), -(responsive * 2));
-                    String msg = MsgUtils.builder().at(event.getUserId()).text("你还想亲别人!")
-                            .text("你老婆对你的好感度-" + (responsive * 2)).build();
-                    bot.sendGroupMsg(event.getGroupId(), msg, false);
-                    return ReturnType.IGNORE_FALSE();
-                }
-                wifeMapper.updateWifeResponsive(event.getUserId(), -responsive);
-                redisTemplate.opsForValue().set("Kiss"+ event.getUserId(), qq, 6, TimeUnit.HOURS);
-                String msg = MsgUtils.builder().at(event.getUserId()).text("你亲了亲").at(qq).text("。❤\n")
-                        .text("你老婆对你的好感度-" + responsive).build();
-                bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return ReturnType.IGNORE_FALSE();
-            } else {
-                String msg = MsgUtils.builder().at(event.getUserId()).text("你亲了亲").at(qq).text("。❤\n")
-                        .text("什么都没有发生。").build();
-                bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return ReturnType.IGNORE_FALSE();
-            }
+
+        event.setMessage(AtUtil.parseCQCode(event.getMessage()));
+
+        Long wifeQQ = wifeMapper.isWife(event.getUserId());
+        Long husbandQQ = wifeMapper.isHusband(event.getUserId());
+
+        String msg = event.getMessage();
+
+        // 处理抱抱命令
+        Matcher embraceMatcher = EMBRACE_PATTERN.matcher(msg);
+        if (embraceMatcher.matches()) {
+            long targetQQ = Long.parseLong(embraceMatcher.group(1) != null ? embraceMatcher.group(1) : embraceMatcher.group(2));
+            return handleEmbrace(bot, event, wifeQQ, husbandQQ, targetQQ);
         }
-        if (event.getMessage().equals("给零花钱")) {
-            if (moneyMapper.selectMoney(event.getUserId()) < 200) {
-                String msg = MsgUtils.builder().at(event.getUserId()).text("你的积分不多了,先照顾好自己吧。").build();
-                bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return ReturnType.IGNORE_FALSE();
-            }
-            if (Boolean.TRUE.equals(redisTemplate.hasKey("giveMoney" + event.getUserId()))) {
-                String msg = MsgUtils.builder().at(event.getUserId()).text("你今天已经给过对方零花钱了，明天再来吧。").build();
-                bot.sendGroupMsg(event.getGroupId(), msg, false);
-                return ReturnType.IGNORE_FALSE();
-            }
-            int i = random.nextInt(20) + 1;
-            Wife wife = wifeMapper.selectInfo(event.getUserId());
-            if (Objects.equals(wife.getWife(), event.getUserId())) {
-                moneyMapper.deductionMoney(event.getUserId(), -i * 10);
-                moneyMapper.addMoney(wife.getHusband(), i * 10);
-                wifeMapper.updateHusbandResponsive(event.getUserId(), i);
-                redisTemplate.opsForValue().set("giveMoney" + event.getUserId(), 1);
-                String msg = MsgUtils.builder().at(event.getUserId()).text("你给了你的老公").at(wife.getHusband()).text( i * 10 + "零花钱。")
-                        .text("\n你老公对你的好感度+" + i).build();
-                bot.sendGroupMsg(event.getGroupId(), msg, false);
-            } else if (Objects.equals(wife.getHusband(), event.getUserId())) {
-                moneyMapper.deductionMoney(event.getUserId(), -i * 10);
-                moneyMapper.addMoney(wife.getWife(), i * 10);
-                wifeMapper.updateWifeResponsive(event.getUserId(), i);
-                redisTemplate.opsForValue().set("giveMoney" + event.getUserId(), 1);
-                String msg = MsgUtils.builder().at(event.getUserId()).text("你给了你的老婆").at(wife.getWife()).text( i * 10 + "零花钱。")
-                        .text("\n你老婆对你的好感度+" + i).build();
-                bot.sendGroupMsg(event.getGroupId(), msg, false);
-            }
-            return ReturnType.IGNORE_FALSE();
+
+        // 处理亲亲命令
+        Matcher kissMatcher = KISS_PATTERN.matcher(msg);
+        if (kissMatcher.matches()) {
+            long targetQQ = Long.parseLong(kissMatcher.group(1) != null ? kissMatcher.group(1) : kissMatcher.group(2));
+            return handleKiss(bot, event, wifeQQ, husbandQQ, targetQQ);
         }
-            return ReturnType.IGNORE_TRUE();
+
+        // 处理给零花钱命令
+        if ("给零花钱".equals(msg)) {
+            return handleGivePocketMoney(bot, event, wifeQQ, husbandQQ);
+        }
+
+        return MESSAGE_IGNORE;
     }
+
+    private int handleEmbrace(Bot bot, GroupMessageEvent event, Long wifeQQ, Long husbandQQ, long targetQQ) {
+        int responsive = random.nextInt(20) + 1;
+        Long cachedQQ = getCachedQQ("Embrace:" + event.getUserId());
+
+        // 用户抱的是自己的老婆
+        if (Objects.equals(wifeQQ, targetQQ)) {
+            if (cachedQQ != null) {
+                if (cachedQQ.equals(targetQQ)) {
+                    sendMsg(bot, event.getGroupId(), event.getUserId(), "你已经抱过你的老公了。\n过一会再来吧。");
+                    return returnType.IGNORE_FALSE(event.getMessageId());
+                } else {
+                    wifeMapper.updateHusbandResponsive(event.getUserId(), -responsive);
+                    sendMsg(bot, event.getGroupId(), event.getUserId(), "你已经抱过别人了!\n你的老公给了你一拳!\n你老公对你的好感度-" + responsive);
+                    return returnType.IGNORE_FALSE(event.getMessageId());
+                }
+            }
+            wifeMapper.updateHusbandResponsive(event.getUserId(), responsive);
+            setCache("Embrace:" + event.getUserId(), targetQQ, 120);
+            sendMsg(bot, event.getGroupId(), event.getUserId(), "你抱了抱你的老公。\n你老公对你的好感度+" + responsive);
+            return returnType.IGNORE_FALSE(event.getMessageId());
+        }
+
+        // 用户抱的是自己的老公
+        if (Objects.equals(husbandQQ, targetQQ)) {
+            if (cachedQQ != null) {
+                if (cachedQQ.equals(targetQQ)) {
+                    sendMsg(bot, event.getGroupId(), event.getUserId(), "你已经抱过你的老婆了。\n过一会再来吧。");
+                    return returnType.IGNORE_FALSE(event.getMessageId());
+                } else {
+                    wifeMapper.updateWifeResponsive(event.getUserId(), -responsive);
+                    sendMsg(bot, event.getGroupId(), event.getUserId(), "你已经抱过别人了!\n你的老婆给了你一拳!\n你老婆对你的好感度-" + responsive);
+                    return returnType.IGNORE_FALSE(event.getMessageId());
+                }
+            }
+            wifeMapper.updateWifeResponsive(event.getUserId(), responsive);
+            setCache("Embrace:" + event.getUserId(), targetQQ, 120);
+            sendMsg(bot, event.getGroupId(), event.getUserId(), "你抱了抱你的老婆。\n你老婆对你的好感度+" + responsive);
+            return returnType.IGNORE_FALSE(event.getMessageId());
+        }
+
+        // 用户已婚且抱别人，惩罚力度加倍
+        if (wifeQQ != null) {
+            if (cachedQQ != null) {
+                wifeMapper.updateHusbandResponsive(event.getUserId(), -(responsive * 2));
+                sendMsg(bot, event.getGroupId(), event.getUserId(), "你还想抱别人!\n你老公对你的好感度-" + (responsive * 2));
+                return returnType.IGNORE_FALSE(event.getMessageId());
+            }
+            wifeMapper.updateHusbandResponsive(event.getUserId(), -responsive);
+            setCache("Embrace:" + event.getUserId(), targetQQ, 120);
+            sendMsg(bot, event.getGroupId(), event.getUserId(), "你抱了抱" + targetQQ + "。\n你老公对你的好感度-" + responsive);
+            return returnType.IGNORE_FALSE(event.getMessageId());
+        }
+
+        if (husbandQQ != null) {
+            if (cachedQQ != null) {
+                wifeMapper.updateWifeResponsive(event.getUserId(), -(responsive * 2));
+                sendMsg(bot, event.getGroupId(), event.getUserId(), "你还想抱别人!\n你老婆对你的好感度-" + (responsive * 2));
+                return returnType.IGNORE_FALSE(event.getMessageId());
+            }
+            wifeMapper.updateWifeResponsive(event.getUserId(), -responsive);
+            setCache("Embrace:" + event.getUserId(), targetQQ, 120);
+            sendMsg(bot, event.getGroupId(), event.getUserId(), "你抱了抱" + targetQQ + "。\n你老婆对你的好感度-" + responsive);
+            return returnType.IGNORE_FALSE(event.getMessageId());
+        }
+
+        // 其他情况，什么都没发生
+        sendMsg(bot, event.getGroupId(), event.getUserId(), "你抱了抱" + targetQQ + "。\n什么都没有发生。");
+        return returnType.IGNORE_FALSE(event.getMessageId());
+    }
+
+    private int handleKiss(Bot bot, GroupMessageEvent event, Long wifeQQ, Long husbandQQ, long targetQQ) {
+        int responsive = random.nextInt(100) + 1;
+        Long cachedQQ = getCachedQQ("Kiss:" + event.getUserId());
+
+        // 查询用户夫妻关系详细信息
+        Wife wifeInfo = wifeMapper.selectInfo(event.getUserId());
+
+        // 用户亲的是自己的老婆
+        if (Objects.equals(wifeQQ, targetQQ)) {
+            if (wifeInfo != null && wifeInfo.getHusbandFavorAbility() <= 1000) {
+                sendMsg(bot, event.getGroupId(), event.getUserId(), "你的老公拒绝了你的亲亲。\n他对你的好感度到1000之后再来吧。");
+                return returnType.IGNORE_FALSE(event.getMessageId());
+            }
+            if (cachedQQ != null) {
+                if (cachedQQ.equals(targetQQ)) {
+                    sendMsg(bot, event.getGroupId(), event.getUserId(), "你已经亲过你的老公了。\n过一会再来吧。");
+                    return returnType.IGNORE_FALSE(event.getMessageId());
+                } else {
+                    wifeMapper.updateHusbandResponsive(event.getUserId(), -responsive);
+                    sendMsg(bot, event.getGroupId(), event.getUserId(), "你已经亲过别人了!\n你的老公给了你一拳!\n你老公对你的好感度-" + responsive);
+                    return returnType.IGNORE_FALSE(event.getMessageId());
+                }
+            }
+            wifeMapper.updateHusbandResponsive(event.getUserId(), responsive);
+            setCache("Kiss:" + event.getUserId(), targetQQ, 360);
+            sendMsg(bot, event.getGroupId(), event.getUserId(), "你亲了亲你的老公。❤\n你老公对你的好感度+" + responsive);
+            return returnType.IGNORE_FALSE(event.getMessageId());
+        }
+
+        // 用户亲的是自己的老公
+        if (Objects.equals(husbandQQ, targetQQ)) {
+            if (wifeInfo != null && wifeInfo.getWifeFavorAbility() <= 1000) {
+                sendMsg(bot, event.getGroupId(), event.getUserId(), "你的老婆拒绝了你的亲亲。\n她对你的好感度到1000之后再来吧。");
+                return returnType.IGNORE_FALSE(event.getMessageId());
+            }
+            if (cachedQQ != null) {
+                if (cachedQQ.equals(targetQQ)) {
+                    sendMsg(bot, event.getGroupId(), event.getUserId(), "你已经亲过你的老婆了。\n过一会再来吧。");
+                    return returnType.IGNORE_FALSE(event.getMessageId());
+                } else {
+                    wifeMapper.updateWifeResponsive(event.getUserId(), -responsive);
+                    sendMsg(bot, event.getGroupId(), event.getUserId(), "你已经亲过别人了!\n你的老婆给了你一拳!\n你老婆对你的好感度-" + responsive);
+                    return returnType.IGNORE_FALSE(event.getMessageId());
+                }
+            }
+            wifeMapper.updateWifeResponsive(event.getUserId(), responsive);
+            setCache("Kiss:" + event.getUserId(), targetQQ, 360);
+            sendMsg(bot, event.getGroupId(), event.getUserId(), "你亲了亲你的老婆。❤\n你老婆对你的好感度+" + responsive);
+            return returnType.IGNORE_FALSE(event.getMessageId());
+        }
+
+        // 已婚用户亲别人，惩罚力度加倍
+        if (wifeQQ != null) {
+            if (cachedQQ != null) {
+                wifeMapper.updateHusbandResponsive(event.getUserId(), -(responsive * 2));
+                sendMsg(bot, event.getGroupId(), event.getUserId(), "你还想亲别人!\n你老公对你的好感度-" + (responsive * 2));
+                return returnType.IGNORE_FALSE(event.getMessageId());
+            }
+            wifeMapper.updateHusbandResponsive(event.getUserId(), -responsive);
+            setCache("Kiss:" + event.getUserId(), targetQQ, 360);
+            sendMsg(bot, event.getGroupId(), event.getUserId(), "你亲了亲" + targetQQ + "。❤\n你老公对你的好感度-" + responsive);
+            return returnType.IGNORE_FALSE(event.getMessageId());
+        }
+
+        if (husbandQQ != null) {
+            if (cachedQQ != null) {
+                wifeMapper.updateWifeResponsive(event.getUserId(), -(responsive * 2));
+                sendMsg(bot, event.getGroupId(), event.getUserId(), "你还想亲别人!\n你老婆对你的好感度-" + (responsive * 2));
+                return returnType.IGNORE_FALSE(event.getMessageId());
+            }
+            wifeMapper.updateWifeResponsive(event.getUserId(), -responsive);
+            setCache("Kiss:" + event.getUserId(), targetQQ, 360);
+            sendMsg(bot, event.getGroupId(), event.getUserId(), "你亲了亲" + targetQQ + "。❤\n你老婆对你的好感度-" + responsive);
+            return returnType.IGNORE_FALSE(event.getMessageId());
+        }
+
+        // 其他情况，什么都没发生
+        sendMsg(bot, event.getGroupId(), event.getUserId(), "你亲了亲" + targetQQ + "。❤\n什么都没有发生。");
+        return returnType.IGNORE_FALSE(event.getMessageId());
+    }
+
+    private int handleGivePocketMoney(Bot bot, GroupMessageEvent event, Long wifeQQ, Long husbandQQ) {
+        if (moneyMapper.selectMoney(event.getUserId()) < 200) {
+            sendMsg(bot, event.getGroupId(), event.getUserId(), "你的积分不多了,先照顾好自己吧。");
+            return returnType.IGNORE_FALSE(event.getMessageId());
+        }
+        if (Boolean.TRUE.equals(redisTemplate.hasKey("giveMoney:" + event.getUserId()))) {
+            sendMsg(bot, event.getGroupId(), event.getUserId(), "你今天已经给过对方零花钱了，明天再来吧。");
+            return returnType.IGNORE_FALSE(event.getMessageId());
+        }
+        int i = random.nextInt(20) + 1;
+        Wife wife = wifeMapper.selectInfo(event.getUserId());
+        if (wife == null) {
+            sendMsg(bot, event.getGroupId(), event.getUserId(), "你还没有结婚，无法给零花钱哦。");
+            return returnType.IGNORE_FALSE(event.getMessageId());
+        }
+
+        if (Objects.equals(wife.getWife(), event.getUserId())) {
+            moneyMapper.deductionMoney(event.getUserId(), -i * 10);
+            moneyMapper.addMoney(wife.getHusband(), i * 10);
+            wifeMapper.updateHusbandResponsive(event.getUserId(), i);
+            setCache("giveMoney:" + event.getUserId(), 1, 24 * 60); // 24小时缓存
+            sendMsg(bot, event.getGroupId(), event.getUserId(),
+                    "你给了你的老公" + wife.getHusband() + i * 10 + "零花钱。\n你老公对你的好感度+" + i);
+        } else if (Objects.equals(wife.getHusband(), event.getUserId())) {
+            moneyMapper.deductionMoney(event.getUserId(), -i * 10);
+            moneyMapper.addMoney(wife.getWife(), i * 10);
+            wifeMapper.updateWifeResponsive(event.getUserId(), i);
+            setCache("giveMoney:" + event.getUserId(), 1, 24 * 60);
+            sendMsg(bot, event.getGroupId(), event.getUserId(),
+                    "你给了你的老婆" + wife.getWife() + i * 10 + "零花钱。\n你老婆对你的好感度+" + i);
+        } else {
+            sendMsg(bot, event.getGroupId(), event.getUserId(), "你还没有结婚，无法给零花钱哦。");
+        }
+        return returnType.IGNORE_FALSE(event.getMessageId());
+    }
+
+    private Long getCachedQQ(String key) {
+        Object val = redisTemplate.opsForValue().get(key);
+        if (val instanceof Number) {
+            return ((Number) val).longValue();
+        }
+        if (val instanceof String) {
+            try {
+                return Long.parseLong((String) val);
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return null;
+    }
+
+    private void setCache(String key, Object value, long minutes) {
+        redisTemplate.opsForValue().set(key, value, minutes, TimeUnit.MINUTES);
+    }
+
+    private void sendMsg(Bot bot, long groupId, long userId, String text) {
+        String msg = MsgUtils.builder().at(userId).text(text).build();
+        bot.sendGroupMsg(groupId, msg, false);
+    }
+
 }

@@ -197,6 +197,15 @@ public class HttpPostExample {
         return baseUrl + path;
     }
 
+    public static String joinUrl(String path) {
+        if (path == null || path.isEmpty()) {
+            return "/";
+        }
+        path = path.replaceAll("^/+", ""); // 去掉前导 /
+        return "/" + path;
+    }
+
+
     public static String getRandomPic() {
         String apiUrl = "https://api.apiopen.top/api/getImages?page=" + 1 + "&size=" + 1 + "&type=comic";
 

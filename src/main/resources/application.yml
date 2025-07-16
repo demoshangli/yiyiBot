@@ -7,14 +7,17 @@ shiro:
       url: "/ws/yiyi"
   plugin-list:
     - com.bot.yiyi.plugin.RegisterPlugin
+    - com.bot.yiyi.plugin.OwnerPlugin
     - com.bot.yiyi.plugin.ServerPlugin
     - com.bot.yiyi.plugin.MenuPlugin
-    - com.bot.yiyi.plugin.soundPlugin
+    - com.bot.yiyi.plugin.SoundPlugin
     - com.bot.yiyi.plugin.ApiPlugin
     - com.bot.yiyi.plugin.ImageProcessorPlugin
     - com.bot.yiyi.plugin.MoneyPlugin
     - com.bot.yiyi.plugin.WifePlugin
     - com.bot.yiyi.plugin.ResponsivePlugin
+    - com.bot.yiyi.plugin.GamePlugin
+    - com.bot.yiyi.plugin.HumanPlugin
     - com.bot.yiyi.plugin.AiPlugin
 spring:
   datasource:
@@ -33,13 +36,14 @@ spring:
 #      api-key: sk-fe29bd4c8b1e41089b946317184954ea
 #      base-url: https://api.deepseek.com
       api-key: sk-jyeqqjjeeavcifoigfijvdgwydyvbtvzuemtjwnntxwlrfsa
-      base-url: https://api.siliconflow.com/
+      base-url: https://api.siliconflow.cn/
       chat:
         options:
+          temperature: 0.4
 #          model: deepseek-reasoner
           model: Pro/deepseek-ai/DeepSeek-R1
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.bot.yiyi.pojo
 bot:
-  ownerQQ: 2376539644
+  ownerQQ: 2376539644,2154209138

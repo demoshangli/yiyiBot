@@ -6,28 +6,31 @@ import com.bot.yiyi.Pojo.ReturnType;
 import com.bot.yiyi.utils.AtUtil;
 import com.bot.yiyi.utils.HttpPostExample;
 import com.mikuac.shiro.common.utils.MsgUtils;
-import com.mikuac.shiro.common.utils.OneBotMedia;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.core.BotPlugin;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import lombok.SneakyThrows;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
-import static com.bot.yiyi.plugin.RegisterPlugin.atBot;
+import static com.bot.yiyi.Pojo.AtBot.AT_BOT;
 
 @Component
 public class ServerPlugin extends BotPlugin {
 
+    @Autowired
+    private ReturnType returnType;
+
     @SneakyThrows
     @Override
     public int onGroupMessage(Bot bot, GroupMessageEvent event) {
-        Set<String> serverSet = new HashSet<>(Arrays.asList("!teams", atBot + "!teams", "！teams", atBot + "！teams"));
+        Set<String> serverSet = new HashSet<>(Arrays.asList("!teams", AT_BOT + "!teams", "！teams", AT_BOT + "！teams"));
         if (serverSet.contains(event.getMessage())) {
             CountDownLatch latch = new CountDownLatch(1);
             String[] serverInfo = new String[1];
@@ -87,8 +90,8 @@ public class ServerPlugin extends BotPlugin {
                 msgList.add(msg);
             }
             bot.sendGroupForwardMsg(event.getGroupId(), AtUtil.toForward("依依", bot.getSelfId(), msgList));
-            return ReturnType.IGNORE_FALSE();
+            return returnType.IGNORE_FALSE(event.getMessageId());
         }
-        return ReturnType.IGNORE_TRUE();
+        return MESSAGE_IGNORE;
     }
 }

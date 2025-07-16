@@ -8,5 +8,14 @@ import org.springframework.stereotype.Component;
 @ConfigurationProperties(prefix = "bot")
 @Data
 public class BotConfig {
-    private Long ownerQQ;
+    private Long[] ownerQQ;
+
+    public boolean isOwnerQQ(Long userId) {
+        for (Long ownerQQ : ownerQQ) {
+            if (ownerQQ.equals(userId)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

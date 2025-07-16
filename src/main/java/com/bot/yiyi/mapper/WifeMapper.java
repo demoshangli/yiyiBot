@@ -24,4 +24,8 @@ public interface WifeMapper {
     void updateWifeResponsive(@Param("userId") Long userId, @Param("responsive") int responsive);
 
     void updateHusbandResponsive(@Param("userId") Long userId, @Param("responsive") int responsive);
+
+    void setHusbandResponsive(@Param("userId") Long userId, @Param("responsive") int responsive);
+
+    void setWifeResponsive(@Param("userId") Long userId, @Param("responsive") int responsive);
 }

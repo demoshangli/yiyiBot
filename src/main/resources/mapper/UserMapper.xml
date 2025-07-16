@@ -9,7 +9,7 @@
         insert into group_user_info values (0,#{userId},#{groupId})
     </insert>
     <insert id="addGroup">
-        insert into group_info values (0,#{groupId},0)
+        insert into group_info values (0,#{groupId},0,0,0,0)
     </insert>
     <update id="updateDay">
         update user set is_check_in = #{Check}, bank = #{money}, lottery_time = #{lotteryTime} where id = #{userId}

@@ -33,6 +33,15 @@ public class RedisConversationService {
         addMessage(sessionId, new AssistantMessage(content));
     }
 
+    public void addUserMessage(String sessionId, String content) {
+        addMessage(sessionId, new UserMessage(content));
+    }
+
+    // 存储AI回复
+    public void addAssistantMessage(String sessionId, String content) {
+        addMessage(sessionId, new AssistantMessage(content));
+    }
+
     private void addMessage(Long sessionId, Message message) {
         String key = "conversation:" + sessionId;
 
@@ -45,7 +54,31 @@ public class RedisConversationService {
         redisTemplate.opsForList().trim(key, -MAX_HISTORY, -1);
     }
 
+    public void addMessage(String sessionId, String message, int maxHistory) {
+        String key = "conversation:" + sessionId;
+        // 从右侧插入新消息
+        redisTemplate.opsForList().rightPush(key, message);
+        // 保持最多10条记录
+        redisTemplate.opsForList().trim(key, -maxHistory, -1);
+    }
+
+    private void addMessage(String sessionId, Message message) {
+        String key = "conversation:" + sessionId;
+
+        // 将消息对象序列化为 JSON
+        String jsonMessage = JSON.toJSONString(message);
+
+        // 从右侧插入新消息
+        redisTemplate.opsForList().rightPush(key, jsonMessage);
+        // 保持最多10条记录
+        redisTemplate.opsForList().trim(key, -MAX_HISTORY, -1);
+    }
+
     private String getKey(Long sessionId) {
+        return "conversation:" + sessionId;
+    }
+
+    private String getKey(String sessionId) {
         return "conversation:" + sessionId;
     }
 
@@ -68,7 +101,43 @@ public class RedisConversationService {
         return history.toString();
     }
 
+    public String getFormattedHistory(String sessionId) {
+        String key = getKey(sessionId);
+        List<String> messages = redisTemplate.opsForList().range(key, 0, -1);
+
+        StringBuilder history = new StringBuilder();
+        if (messages != null) {
+            for (String Json : messages) {
+                Message msg = JSON.parseObject(Json, Message.class);
+                if (msg.getMessageType().equals(MessageType.USER)) {
+                    history.append("我: ").append(msg.getContent()).append("\n");
+                } else if (msg.getMessageType().equals(MessageType.ASSISTANT)) {
+                    history.append("你: ").append(msg.getContent()).append("\n");
+                }
+            }
+        }
+        return history.toString();
+    }
+
+    public String getHistory(String sessionId) {
+        String key = getKey(sessionId);
+        List<String> messages = redisTemplate.opsForList().range(key, 0, -1);
+
+        StringBuilder history = new StringBuilder();
+        if (messages != null) {
+            for (String msg : messages) {
+                    history.append("你: ").append(msg).append("\n");
+                }
+            }
+        return history.toString();
+    }
+
     public void clearHistory(Long sessionId) {
+        String key = getKey(sessionId);
+        redisTemplate.delete(key);
+    }
+
+    public void clearHistory(String sessionId) {
         String key = getKey(sessionId);
         redisTemplate.delete(key);
     }

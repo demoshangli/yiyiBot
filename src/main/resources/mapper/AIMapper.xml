@@ -8,10 +8,28 @@
     <update id="updateUserRole">
         update user set ai_role = #{role} where id = #{userId}
     </update>
+    <update id="updateAiType">
+        update group_info set ai_type = #{type} where group_id = #{groupId}
+    </update>
+    <update id="updateHumanState">
+        update group_info set human_state = #{state} where group_id = #{groupId}
+    </update>
+    <update id="updatePro">
+        update group_info set msg_pro = #{pro} where group_id = #{groupId}
+    </update>
     <select id="selectRole" resultType="java.lang.Integer">
         select ai_role from group_info where group_id = #{groupId}
     </select>
     <select id="selectUserRole" resultType="java.lang.Integer">
         select ai_role from user where id = #{userId}
+    </select>
+    <select id="selectAiType" resultType="java.lang.Integer">
+        select ai_type from group_info where group_id = #{groupId}
+    </select>
+    <select id="selectPro" resultType="java.lang.Integer">
+        select msg_pro from group_info where group_id = #{groupId}
+    </select>
+    <select id="selectHumanState" resultType="java.lang.Integer">
+        select human_state from group_info where group_id = #{groupId}
     </select>
 </mapper>

@@ -5,20 +5,26 @@ import com.bot.yiyi.utils.AtUtil;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.core.BotPlugin;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+
+import static com.bot.yiyi.Pojo.AtBot.AT_BOT;
 
 @Component
 public class MenuPlugin extends BotPlugin {
+    
+    @Autowired
+    private ReturnType returnType;
 
     @Override
     public int onAnyMessage(Bot bot, AnyMessageEvent event) {
-        if (event != null && event.getGroupId() == 176282339L) {
-            return ReturnType.IGNORE_TRUE();
+        if (event.getGroupId() != null && event.getGroupId() == 176282339L) {
+            return returnType.IGNORE_TRUE(event.getMessageId());
         }
-        if (event.getMessage().contains("菜单")) {
+        Set<String> gameSet = new HashSet<>(Arrays.asList("菜单", AT_BOT + "菜单"));
+        if (gameSet.contains(event.getMessage())) {
             List<String> menu = new ArrayList<>();
             menu.add("依依菜单Ciallo～(∠・ω< )⌒☆");
             menu.add("发癫文学\n" +
@@ -62,6 +68,8 @@ public class MenuPlugin extends BotPlugin {
             menu.add("智能对话\n" +
                             "@依依 就可以和依依对话啦！\n" +
                             "@依依清空记忆 —— 清空对话记忆\n" +
+                            "@依依+切换模式个人/群聊 切换ai模式\n" +
+                            "@依依+当前模式 查看当前模式\n" +
                             "@依依切换角色+角色 可以切换角色哦~\n" +
                             "目前角色有:\n" +
                             "R18角色-\n" +
@@ -72,13 +80,17 @@ public class MenuPlugin extends BotPlugin {
                             "默认 贴吧老哥 卡芙卡 爱莉希雅 花火\n" +
                             "ps:只有群主和管理员才可以切换角色哦~\n" +
                             "pps:切换角色会自动清空记忆哦~\n");
+            menu.add("伪人功能\n" +
+                    "@依依+开启/关闭伪人模式 开启或关闭伪人模式\n" +
+                    "@依依+设置伪人概率1-100 设置伪人模式回复概率");
+            menu.add("如发现bug或提出建议，请使用 联系主人+内容 进行反馈");
             if (event.getGroupId() != null)
                 bot.sendGroupForwardMsg(event.getGroupId(), AtUtil.toForward(bot.getLoginInfo().getData().getNickname(), bot.getLoginInfo().getData().getUserId(), menu));
             else
                 bot.sendPrivateForwardMsg(event.getUserId(), AtUtil.toForward(bot.getLoginInfo().getData().getNickname(), bot.getLoginInfo().getData().getUserId(), menu));
-            return ReturnType.IGNORE_TRUE();
+            return returnType.IGNORE_FALSE(event.getMessageId());
         }
-        return ReturnType.IGNORE_TRUE();
+        return MESSAGE_IGNORE;
     }
 
 }

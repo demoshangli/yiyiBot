@@ -35,4 +35,10 @@ public interface MoneyMapper {
     void storage(@Param("userId") Long userId, @Param("money") int i);
 
     void withdrawal(@Param("userId") Long userId, @Param("money") int i);
+
+    void setMoney(@Param("userId") Long userId, @Param("money") int i);
+
+    void setBankMoney(@Param("userId") Long userId, @Param("money") int i);
+
+    void resetMoney(@Param("userId") Long userId);
 }

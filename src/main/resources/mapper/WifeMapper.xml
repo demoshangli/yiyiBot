@@ -12,6 +12,12 @@
     <update id="updateHusbandResponsive">
         update wife_list set husband_favor_ability = husband_favor_ability + #{responsive} where wife = #{userId}
     </update>
+    <update id="setHusbandResponsive">
+        update wife_list set husband_favor_ability = #{responsive} where husband = #{userId}
+    </update>
+    <update id="setWifeResponsive">
+        update wife_list set wife_favor_ability = #{responsive} where wife = #{userId}
+    </update>
     <delete id="deleteWife">
         delete from wife_list where husband = #{userId} or wife = #{userId}
     </delete>

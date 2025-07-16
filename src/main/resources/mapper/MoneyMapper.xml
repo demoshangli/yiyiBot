@@ -23,6 +23,15 @@
     <update id="withdrawal">
         update user set money = money + #{money}, bank = bank - #{money} where id = #{userId}
     </update>
+    <update id="setMoney">
+        update user set money = #{money} where id = #{userId}
+    </update>
+    <update id="setBankMoney">
+        update user set bank = #{money} where id = #{userId}
+    </update>
+    <update id="resetMoney">
+        update user set money = 0, bank = 0 where id = #{userId}
+    </update>
     <select id="selectMAX" resultType="com.bot.yiyi.Pojo.User">
         <![CDATA[select id, money + bank as money from user where money + bank > 0 order by money + bank desc limit 10]]>
     </select>
