@@ -24,5 +24,10 @@ public class ReturnType extends BotPlugin {
         redisTemplate.opsForValue().set("AIMsg:" + msgId, false);
         return MESSAGE_IGNORE;
     }
+
+    public int BLOCK(int msgId) {
+        redisTemplate.delete("AIMsg:" + msgId);
+        return MESSAGE_BLOCK;
+    }
 }
 

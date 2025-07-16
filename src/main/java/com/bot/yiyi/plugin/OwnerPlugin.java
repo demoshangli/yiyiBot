@@ -6,7 +6,6 @@ import com.bot.yiyi.config.BotConfig;
 import com.bot.yiyi.mapper.MoneyMapper;
 import com.bot.yiyi.mapper.WifeMapper;
 import com.mikuac.shiro.common.utils.MsgUtils;
-import com.mikuac.shiro.common.utils.OneBotMedia;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.core.BotPlugin;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
@@ -32,15 +31,17 @@ public class OwnerPlugin extends BotPlugin {
 
     // 预编译正则表达式
     private static final Pattern PATTERN_REPLY = Pattern.compile("回复(\\d+)(.+)");
-    private static final Pattern PATTERN_SET_MONEY = Pattern.compile("设置积分(\\d+)\\s*(?:\\[CQ:at,qq=(\\d+)])?");
-    private static final Pattern PATTERN_SET_BANK_MONEY = Pattern.compile("设置银行积分(\\d+)\\s*(?:\\[CQ:at,qq=(\\d+)])?");
+    private static final Pattern PATTERN_SET_MONEY = Pattern.compile("设置积分(-?\\d+)\\s*(?:\\[CQ:at,qq=(\\d+)])?");
+    private static final Pattern PATTERN_SET_BANK_MONEY = Pattern.compile("设置银行积分(-?\\d+)\\s*(?:\\[CQ:at,qq=(\\d+)])?");
     private static final Pattern PATTERN_RESET_MONEY = Pattern.compile("重置积分\\s*(?:\\[CQ:at,qq=(\\d+)])?");
     private static final Pattern PATTERN_RESET_LOTTERY = Pattern.compile("重置抽奖次数\\s*(?:\\[CQ:at,qq=(\\d+)])?");
-    private static final Pattern PATTERN_SET_HUSBAND_LOVE = Pattern.compile("设置老公好感度(\\d+)\\s*(?:\\[CQ:at,qq=(\\d+)])?");
-    private static final Pattern PATTERN_SET_WIFE_LOVE = Pattern.compile("设置老婆好感度(\\d+)\\s*(?:\\[CQ:at,qq=(\\d+)])?");
+    private static final Pattern PATTERN_SET_HUSBAND_LOVE = Pattern.compile("设置老公好感度(-?\\d+)\\s*(?:\\[CQ:at,qq=(\\d+)])?");
+    private static final Pattern PATTERN_SET_WIFE_LOVE = Pattern.compile("设置老婆好感度(-?\\d+)\\s*(?:\\[CQ:at,qq=(\\d+)])?");
     private static final Pattern PATTERN_RESET_LOVE = Pattern.compile("重置好感\\s*(?:\\[CQ:at,qq=(\\d+)])?");
     private static final Pattern PATTERN_SET_WIFE = Pattern.compile("设置老婆\\[CQ:at,qq=(\\d+)]");
     private static final Pattern PATTERN_SET_HUSBAND = Pattern.compile("设置老公\\[CQ:at,qq=(\\d+)]");
+    private static final Pattern PATTERN_SET_TO_HUSBAND = Pattern.compile("设置\\[CQ:at,qq=(\\d+)]\\s*为\\[CQ:at,qq=(\\d+)]\\s*老公");
+    private static final Pattern PATTERN_SET_TO_WIFE = Pattern.compile("设置\\[CQ:at,qq=(\\d+)]\\s*为\\[CQ:at,qq=(\\d+)]\\s*老婆");
 
     @Override
     public int onGroupMessage(Bot bot, GroupMessageEvent event) {
@@ -99,6 +100,16 @@ public class OwnerPlugin extends BotPlugin {
         matcher = PATTERN_SET_HUSBAND.matcher(msg);
         if (matcher.matches()) {
             return handleSetSpouse(bot, event, matcher, true);
+        }
+
+        matcher = PATTERN_SET_TO_HUSBAND.matcher(msg);
+        if (matcher.matches()) {
+            return handleSetToSpouse(bot, event, matcher, true);
+        }
+
+        matcher = PATTERN_SET_TO_WIFE.matcher(msg);
+        if (matcher.matches()) {
+            return handleSetToSpouse(bot, event, matcher, false);
         }
 
         return returnType.IGNORE_TRUE(event.getMessageId());
@@ -172,6 +183,28 @@ public class OwnerPlugin extends BotPlugin {
                 .img("https://q1.qlogo.cn/g?b=qq&nk=" + qq + "&s=640")
                 .at(event.getUserId())
                 .img("https://q1.qlogo.cn/g?b=qq&nk=" + event.getUserId() + "&s=640")
+                .text("恭喜你们成功结为夫妻,祝你们百年好合。")
+                .build();
+        bot.sendGroupMsg(event.getGroupId(), msg, false);
+        return returnType.IGNORE_FALSE(event.getMessageId());
+    }
+
+    private int handleSetToSpouse(Bot bot, GroupMessageEvent event, Matcher matcher, boolean husbandIsFirst) {
+        long qq1 = Long.parseLong(matcher.group(1));
+        long qq2 = Long.parseLong(matcher.group(2));
+        // 删除之前绑定的关系
+        wifeMapper.deleteWife(qq1);
+        wifeMapper.deleteWife(qq2);
+        if (husbandIsFirst) {
+            wifeMapper.marry(qq1, qq2);
+        } else {
+            wifeMapper.marry(qq1, qq2);
+        }
+        String msg = MsgUtils.builder()
+                .at(qq1)
+                .img("https://q1.qlogo.cn/g?b=qq&nk=" + qq1 + "&s=640")
+                .at(qq2)
+                .img("https://q1.qlogo.cn/g?b=qq&nk=" + qq2 + "&s=640")
                 .text("恭喜你们成功结为夫妻,祝你们百年好合。")
                 .build();
         bot.sendGroupMsg(event.getGroupId(), msg, false);

@@ -72,7 +72,7 @@ public class RegisterPlugin extends BotPlugin {
         }
 
         if (limitUtil.isBlack(event.getUserId())) {
-            return MESSAGE_BLOCK;
+            return returnType.BLOCK(event.getMessageId());
         }
         return returnType.IGNORE_TRUE(event.getMessageId());
     }
@@ -91,7 +91,7 @@ public class RegisterPlugin extends BotPlugin {
         }
 
         if (limitUtil.isBlack(userId)) {
-            return MESSAGE_BLOCK;
+            return returnType.BLOCK(event.getMessageId());
         }
         return MESSAGE_IGNORE;
     }

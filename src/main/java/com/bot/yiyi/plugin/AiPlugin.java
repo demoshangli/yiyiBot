@@ -69,17 +69,17 @@ public class AiPlugin extends BotPlugin {
 
     @Override
     public int onPrivateMessage(Bot bot, PrivateMessageEvent event) {
-        if (!returnType.getMatch(event.getMessageId())) return MESSAGE_BLOCK;
+        if (!returnType.getMatch(event.getMessageId())) return returnType.BLOCK(event.getMessageId());
         String msg = event.getMessage();
 
         if (msg.equals("清空记忆")) {
             redisConversationService.clearHistory(event.getUserId());
             bot.sendPrivateMsg(event.getUserId(), "记忆已清空。", true);
-            return MESSAGE_BLOCK;
+            return returnType.BLOCK(event.getMessageId());
         }
 
         if (msg.contains("切换角色") || msg.contains("当前角色")) {
-            return handleRoleCommand(bot, event, false, 1);
+            return handleRoleCommand(bot, event, false, 1, event.getMessageId());
         }
 
         return handleChatMessage(bot, event.getUserId(), msg, false, event.getMessageId());
@@ -87,9 +87,9 @@ public class AiPlugin extends BotPlugin {
 
     @Override
     public int onGroupMessage(Bot bot, GroupMessageEvent event) {
-        if (event.getGroupId() == 176282339L) return MESSAGE_BLOCK;
+        if (event.getGroupId() == 176282339L) return returnType.BLOCK(event.getMessageId());
 
-        if (!AtUtil.isAt(bot.getLoginInfo().getData(), event)) return MESSAGE_BLOCK;
+        if (!AtUtil.isAt(bot.getLoginInfo().getData(), event)) return returnType.BLOCK(event.getMessageId());
 
         String msg = event.getMessage();
         long groupId = event.getGroupId();
@@ -99,36 +99,36 @@ public class AiPlugin extends BotPlugin {
         if (msg.contains("清空记忆")) {
             redisConversationService.clearHistory(aiType == 0 ? groupId : userId);
             bot.sendGroupMsg(groupId, "记忆已清空。", true);
-            return MESSAGE_BLOCK;
+            return returnType.BLOCK(event.getMessageId());
         }
 
         if (msg.contains("切换角色") || msg.contains("当前角色")) {
-            return handleRoleCommand(bot, event, true, aiType);
+            return handleRoleCommand(bot, event, true, aiType, event.getMessageId());
         }
 
         if (msg.contains("切换模式群聊")) {
             aiMapper.updateAiType(0, groupId);
             bot.sendGroupMsg(groupId, "已切换为群聊模式。", true);
-            return MESSAGE_BLOCK;
+            return returnType.BLOCK(event.getMessageId());
         }
         if (msg.contains("切换模式个人")) {
             aiMapper.updateAiType(1, groupId);
             bot.sendGroupMsg(groupId, "已切换为个人模式。", true);
-            return MESSAGE_BLOCK;
+            return returnType.BLOCK(event.getMessageId());
         }
         if (msg.contains("当前模式")) {
             String mode = aiType == 0 ? "群聊" : "个人";
             bot.sendGroupMsg(groupId, "当前模式为" + mode + "模式。", true);
-            return MESSAGE_BLOCK;
+            return returnType.BLOCK(event.getMessageId());
         }
 
         if (returnType.getMatch(event.getMessageId())) {
             return handleChatMessage(bot, aiType == 0 ? groupId : userId, cleanGroupMessage(bot, event), true, event.getMessageId());
         }
-        return MESSAGE_BLOCK;
+        return returnType.BLOCK(event.getMessageId());
     }
 
-    private int handleRoleCommand(Bot bot, MessageEvent event, boolean isGroup, int aiType) {
+    private int handleRoleCommand(Bot bot, MessageEvent event, boolean isGroup, int aiType, int messageId) {
         String msg = event.getMessage();
         long id = isGroup ? ((GroupMessageEvent) event).getGroupId() : event.getUserId();
 
@@ -139,7 +139,7 @@ public class AiPlugin extends BotPlugin {
 
                 redisConversationService.clearHistory(id);
                 sendMsg(bot, id, isGroup, "依依已经切换到" + entry.getKey() + "啦。");
-                return MESSAGE_BLOCK;
+                return returnType.BLOCK(messageId);
             }
         }
 
@@ -147,11 +147,11 @@ public class AiPlugin extends BotPlugin {
             int roleId = isGroup && aiType == 0 ? aiMapper.selectRole(id) : aiMapper.selectUserRole(event.getUserId());
             String roleName = ROLE_MAP.entrySet().stream().filter(e -> e.getValue() == roleId).map(Map.Entry::getKey).findFirst().orElse("未知角色");
             sendMsg(bot, id, isGroup, "当前角色为" + roleName + "。");
-            return MESSAGE_BLOCK;
+            return returnType.BLOCK(messageId);
         }
 
         sendMsg(bot, id, isGroup, "依依没有这个角色哦。");
-        return MESSAGE_BLOCK;
+        return returnType.BLOCK(messageId);
     }
 
     private int handleChatMessage(Bot bot, long sessionId, String msg, boolean isGroup, int replyId) {
@@ -167,7 +167,7 @@ public class AiPlugin extends BotPlugin {
                 else bot.sendPrivateMsg(sessionId, message, false);
             });
         }
-        return MESSAGE_BLOCK;
+        return returnType.BLOCK(replyId);
     }
 
     private String cleanGroupMessage(Bot bot, GroupMessageEvent event) {
