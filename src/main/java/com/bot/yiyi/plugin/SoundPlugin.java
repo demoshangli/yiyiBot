@@ -3,7 +3,6 @@ package com.bot.yiyi.plugin;
 import com.bot.yiyi.Pojo.ReturnType;
 import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.core.Bot;
-import com.mikuac.shiro.core.BotPlugin;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -11,7 +10,7 @@ import org.springframework.stereotype.Component;
 import java.util.*;
 
 @Component
-public class SoundPlugin extends BotPlugin {
+public class SoundPlugin extends BasePlugin {
 
     @Autowired
     private ReturnType returnType;

@@ -7,7 +7,6 @@ import com.bot.yiyi.utils.AtUtil;
 import com.bot.yiyi.utils.HttpPostExample;
 import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.core.Bot;
-import com.mikuac.shiro.core.BotPlugin;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import lombok.SneakyThrows;
 import org.java_websocket.client.WebSocketClient;
@@ -22,7 +21,7 @@ import java.util.concurrent.CountDownLatch;
 import static com.bot.yiyi.Pojo.AtBot.AT_BOT;
 
 @Component
-public class ServerPlugin extends BotPlugin {
+public class ServerPlugin extends BasePlugin {
 
     @Autowired
     private ReturnType returnType;

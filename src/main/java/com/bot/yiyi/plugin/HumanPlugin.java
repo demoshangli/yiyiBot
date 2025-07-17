@@ -7,14 +7,12 @@ import com.bot.yiyi.mapper.AIMapper;
 import com.bot.yiyi.utils.RedisConversationService;
 import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.core.Bot;
-import com.mikuac.shiro.core.BotPlugin;
 import com.mikuac.shiro.dto.action.response.GroupMemberInfoResp;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +23,7 @@ import java.util.regex.Pattern;
 import static com.bot.yiyi.Pojo.AtBot.AT_BOT;
 
 @Component
-public class HumanPlugin extends BotPlugin {
+public class HumanPlugin extends BasePlugin {
 
     @Autowired
     private RedisConversationService redisConversationService;

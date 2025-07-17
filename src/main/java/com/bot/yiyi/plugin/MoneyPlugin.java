@@ -7,7 +7,6 @@ import com.bot.yiyi.mapper.UserMapper;
 import com.bot.yiyi.utils.LimitUtil;
 import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.core.Bot;
-import com.mikuac.shiro.core.BotPlugin;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -20,7 +19,7 @@ import static com.bot.yiyi.Pojo.AtBot.AT_BOT;
 import static com.bot.yiyi.utils.OperationUtils.luckyDraw;
 
 @Component
-public class MoneyPlugin extends BotPlugin {
+public class MoneyPlugin extends BasePlugin {
 
     @Autowired
     private MoneyMapper moneyMapper;

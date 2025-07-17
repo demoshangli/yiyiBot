@@ -7,7 +7,6 @@ import com.bot.yiyi.mapper.MoneyMapper;
 import com.bot.yiyi.mapper.WifeMapper;
 import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.core.Bot;
-import com.mikuac.shiro.core.BotPlugin;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -18,7 +17,7 @@ import java.util.regex.Pattern;
 import static com.bot.yiyi.Pojo.AtBot.AT_BOT;
 
 @Component
-public class OwnerPlugin extends BotPlugin {
+public class OwnerPlugin extends BasePlugin {
 
     @Autowired
     private BotConfig botConfig;

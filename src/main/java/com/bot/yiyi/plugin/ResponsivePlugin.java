@@ -8,7 +8,6 @@ import com.bot.yiyi.utils.AtUtil;
 import com.bot.yiyi.utils.LimitUtil;
 import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.core.Bot;
-import com.mikuac.shiro.core.BotPlugin;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -21,7 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Component
-public class ResponsivePlugin extends BotPlugin {
+public class ResponsivePlugin extends BasePlugin {
 
     @Autowired
     private WifeMapper wifeMapper;

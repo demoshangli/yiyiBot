@@ -3,7 +3,6 @@ package com.bot.yiyi.plugin;
 import com.bot.yiyi.Pojo.ReturnType;
 import com.bot.yiyi.utils.AtUtil;
 import com.mikuac.shiro.core.Bot;
-import com.mikuac.shiro.core.BotPlugin;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -13,7 +12,7 @@ import java.util.*;
 import static com.bot.yiyi.Pojo.AtBot.AT_BOT;
 
 @Component
-public class MenuPlugin extends BotPlugin {
+public class MenuPlugin extends BasePlugin {
     
     @Autowired
     private ReturnType returnType;

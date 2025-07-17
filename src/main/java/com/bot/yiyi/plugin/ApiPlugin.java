@@ -6,7 +6,6 @@ import com.bot.yiyi.utils.HttpPostExample;
 import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.common.utils.OneBotMedia;
 import com.mikuac.shiro.core.Bot;
-import com.mikuac.shiro.core.BotPlugin;
 import com.mikuac.shiro.dto.action.response.LoginInfoResp;
 import com.mikuac.shiro.dto.action.response.StrangerInfoResp;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
@@ -18,7 +17,7 @@ import java.util.*;
 import static com.bot.yiyi.Pojo.AtBot.AT_BOT;
 
 @Component
-public class ApiPlugin extends BotPlugin {
+public class ApiPlugin extends BasePlugin {
 
     @Autowired
     private ReturnType returnType;
@@ -37,7 +36,7 @@ public class ApiPlugin extends BotPlugin {
 
         // 仅@机器人时触发 AI 回复（crazy 模式）
         if (AtUtil.onlyAt(data, event)) {
-            String crazy = HttpPostExample.crazy().replaceAll("745689", strangerInfo.getNickname());
+            String crazy = Objects.requireNonNull(HttpPostExample.crazy()).replaceAll("745689", strangerInfo.getNickname());
             String img = MsgUtils.builder().img(OneBotMedia.builder().file("https://q1.qlogo.cn/g?b=qq&nk=" + event.getUserId() + "&s=640").summary("快来操死我")).build();
             msgList.add(crazy);
             msgList.add(img);
@@ -53,7 +52,7 @@ public class ApiPlugin extends BotPlugin {
             }
             if (qqList.size() == 1) {
                 StrangerInfoResp toStrangerInfo = bot.getStrangerInfo(qqList.get(0), true).getData();
-                String crazy = HttpPostExample.crazy().replaceAll("745689", toStrangerInfo.getNickname());
+                String crazy = Objects.requireNonNull(HttpPostExample.crazy()).replaceAll("745689", toStrangerInfo.getNickname());
                 String img = MsgUtils.builder().img(OneBotMedia.builder().file("https://q1.qlogo.cn/g?b=qq&nk=" + qqList.get(0) + "&s=640").summary("快来操死我")).build();
                 msgList.add(crazy);
                 msgList.add(img);
@@ -62,7 +61,7 @@ public class ApiPlugin extends BotPlugin {
             } else if (qqList.size() == 2) {
                 StrangerInfoResp toStrangerInfo = bot.getStrangerInfo(qqList.get(1), true).getData();
                 StrangerInfoResp fromStrangerInfo = bot.getStrangerInfo(qqList.get(0), true).getData();
-                String crazy = HttpPostExample.crazy().replaceAll("745689", toStrangerInfo.getNickname());
+                String crazy = Objects.requireNonNull(HttpPostExample.crazy()).replaceAll("745689", toStrangerInfo.getNickname());
                 String img = MsgUtils.builder().img(OneBotMedia.builder().file("https://q1.qlogo.cn/g?b=qq&nk=" + qqList.get(1) + "&s=640").summary("快来操死我")).build();
                 msgList.add(crazy);
                 msgList.add(img);

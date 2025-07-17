@@ -6,7 +6,6 @@ import com.bot.yiyi.utils.LimitUtil;
 import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.common.utils.OneBotMedia;
 import com.mikuac.shiro.core.Bot;
-import com.mikuac.shiro.core.BotPlugin;
 import com.mikuac.shiro.dto.action.response.GroupMemberInfoResp;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,7 @@ import java.util.regex.Pattern;
 import static com.bot.yiyi.Pojo.AtBot.AT_BOT;
 
 @Component
-public class GamePlugin extends BotPlugin {
+public class GamePlugin extends BasePlugin {
 
     @Autowired
     private LimitUtil limitUtil;
@@ -58,7 +57,7 @@ public class GamePlugin extends BotPlugin {
             String redisKey = "groupFriend:" + userId;
 
             // 判断是否已有未完成游戏
-            if (redisTemplate.hasKey(redisKey)) {
+            if (Boolean.TRUE.equals(redisTemplate.hasKey(redisKey))) {
                 Long lastTargetId = (Long) redisTemplate.opsForValue().get(redisKey);
                 String msg = MsgUtils.builder()
                         .at(userId).text("你的上一轮还没有完成哦~")
@@ -108,7 +107,7 @@ public class GamePlugin extends BotPlugin {
             String redisKey = "groupFriend:" + userId;
 
             // 没有游戏记录
-            if (!redisTemplate.hasKey(redisKey)) {
+            if (Boolean.FALSE.equals(redisTemplate.hasKey(redisKey))) {
                 String msg = MsgUtils.builder().at(userId).text("你还没有开始游戏哦。发送 看头像猜群友 开始吧~").build();
                 bot.sendGroupMsg(groupId, msg, false);
                 return returnType.IGNORE_FALSE(messageId);

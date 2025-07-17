@@ -10,7 +10,6 @@ import com.bot.yiyi.utils.AtUtil;
 import com.bot.yiyi.utils.RedisConversationService;
 import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.core.Bot;
-import com.mikuac.shiro.core.BotPlugin;
 import com.mikuac.shiro.dto.action.response.GroupMemberInfoResp;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import com.mikuac.shiro.dto.event.message.MessageEvent;
@@ -30,7 +29,7 @@ import java.util.regex.Pattern;
 import static com.bot.yiyi.Pojo.AtBot.AT_BOT;
 
 @Component
-public class AiPlugin extends BotPlugin {
+public class AiPlugin extends BasePlugin {
 
     private final ChatClient.Builder builder;
     private ChatClient chatClient;
@@ -82,7 +81,7 @@ public class AiPlugin extends BotPlugin {
             return handleRoleCommand(bot, event, false, 1, event.getMessageId());
         }
 
-        return handleChatMessage(bot, event.getUserId(), msg, false, event.getMessageId());
+        return handleChatMessage(bot, 1, event.getUserId(), msg, false, event.getMessageId(), 1);
     }
 
     @Override
@@ -107,7 +106,8 @@ public class AiPlugin extends BotPlugin {
         }
 
         if (msg.contains("切换模式群聊")) {
-            if (!isAdmin(bot, event, aiType)) {
+            if (!isAdmin(bot, event)) {
+                bot.sendGroupMsg(groupId, "只有管理员才能切换模式哦。", true);
                 return returnType.BLOCK(event.getMessageId());
             }
             aiMapper.updateAiType(0, groupId);
@@ -115,7 +115,8 @@ public class AiPlugin extends BotPlugin {
             return returnType.BLOCK(event.getMessageId());
         }
         if (msg.contains("切换模式个人")) {
-            if (!isAdmin(bot, event, aiType)) {
+            if (!isAdmin(bot, event)) {
+                bot.sendGroupMsg(groupId, "只有管理员才能切换模式哦。", true);
                 return returnType.BLOCK(event.getMessageId());
             }
             aiMapper.updateAiType(1, groupId);
@@ -129,7 +130,7 @@ public class AiPlugin extends BotPlugin {
         }
 
         if (returnType.getMatch(event.getMessageId())) {
-            return handleChatMessage(bot, aiType == 0 ? groupId : userId, cleanGroupMessage(bot, event), true, event.getMessageId());
+            return handleChatMessage(bot, groupId, userId, cleanGroupMessage(bot, event), true, event.getMessageId(), aiType);
         }
         return returnType.BLOCK(event.getMessageId());
     }
@@ -139,7 +140,8 @@ public class AiPlugin extends BotPlugin {
         long id = isGroup ? ((GroupMessageEvent) event).getGroupId() : event.getUserId();
         for (Map.Entry<String, Integer> entry : ROLE_MAP.entrySet()) {
             if (msg.contains("切换角色" + entry.getKey())) {
-                if (isAdmin(bot, event, aiType)) {
+                if (!isAdmin(bot, event, aiType)) {
+                    bot.sendGroupMsg(id, "只有管理员才能切换角色哦。", true);
                     return returnType.BLOCK(messageId);
                 }
                 if (isGroup && aiType == 0) aiMapper.updateRole(id, entry.getValue());
@@ -162,17 +164,24 @@ public class AiPlugin extends BotPlugin {
         return returnType.BLOCK(messageId);
     }
 
-    private int handleChatMessage(Bot bot, long sessionId, String msg, boolean isGroup, int replyId) {
-        ParsedMessage parsed = parseMessage(msg);
-        int roleType = isGroup ? aiMapper.selectRole(sessionId) : aiMapper.selectUserRole(sessionId);
+    private int handleChatMessage(Bot bot, long groupId, long userId, String msg, boolean isGroup, int replyId, int aiType) {
+        long sessionId = aiType == 0 ? groupId : userId; // 群模式下按群存，个人模式按人存
+        int roleType = aiType == 0 ? aiMapper.selectRole(groupId) : aiMapper.selectUserRole(userId);
         updateRoleById(roleType);
 
-        Mono<String> context = getContext(parsed.text, sessionId);
+        Mono<String> context = getContext(msg, sessionId);
         context.subscribe(s -> {
-            String message = isGroup ? MsgUtils.builder().reply(replyId).at(sessionId).text(s).build() : s;
-            if (isGroup) bot.sendGroupMsg(sessionId, message, false);
-            else bot.sendPrivateMsg(sessionId, message, false);
+            String message = isGroup
+                    ? MsgUtils.builder().reply(replyId).at(userId).text(s).build()
+                    : s;
+
+            if (isGroup) {
+                bot.sendGroupMsg(groupId, message, false); // ✅ 发送目标始终是群号
+            } else {
+                bot.sendPrivateMsg(userId, message, false);
+            }
         });
+
         return returnType.BLOCK(replyId);
     }
 
@@ -259,9 +268,14 @@ public class AiPlugin extends BotPlugin {
 
     private boolean isAdmin(Bot bot, MessageEvent event, int aiType) {
         if (aiType == 0) {
+            return isAdmin(bot, event);
+        }
+        return true;
+    }
+
+    private boolean isAdmin(Bot bot, MessageEvent event) {
             String role = bot.getGroupMemberInfo(((GroupMessageEvent) event).getGroupId(), event.getUserId(), true).getData().getRole();
             return botConfig.isOwnerQQ(event.getUserId()) || role.equals("owner") || role.equals("admin");
-        }
-        return false;
     }
+
 }

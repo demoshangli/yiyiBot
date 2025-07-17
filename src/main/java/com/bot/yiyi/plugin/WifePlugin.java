@@ -11,7 +11,6 @@ import com.bot.yiyi.utils.LimitUtil;
 import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.common.utils.OneBotMedia;
 import com.mikuac.shiro.core.Bot;
-import com.mikuac.shiro.core.BotPlugin;
 import com.mikuac.shiro.dto.action.response.GroupMemberInfoResp;
 import com.mikuac.shiro.dto.action.response.StrangerInfoResp;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
@@ -28,7 +27,7 @@ import static com.bot.yiyi.Pojo.AtBot.AT_BOT;
 
 
 @Component
-public class WifePlugin extends BotPlugin {
+public class WifePlugin extends BasePlugin {
 
     @Autowired
     private WifeMapper wifeMapper;
@@ -745,10 +744,10 @@ public class WifePlugin extends BotPlugin {
                         }
                         break;
                     case 1:
-                        redisTemplate.opsForValue().set("black:" + event.getUserId(), 1, 30, TimeUnit.MINUTES);
+                        redisTemplate.opsForValue().set("join:" + event.getUserId(), 1, 30, TimeUnit.MINUTES);
                         msg = MsgUtils.builder().at(event.getUserId()).text("你成功强暴了").at(qq).text("!")
                                 .img(OneBotMedia.builder().file("https://q1.qlogo.cn/g?b=qq&nk=" + qq + "&s=640"))
-                                .at(qq).text("报警,你被拉黑30分钟").build();
+                                .at(qq).text("报警,你被关进大牢30分钟").build();
                         break;
                 }
                 bot.sendGroupMsg(event.getGroupId(), msg, false);

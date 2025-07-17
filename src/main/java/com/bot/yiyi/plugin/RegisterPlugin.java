@@ -7,9 +7,9 @@ import com.bot.yiyi.mapper.MoneyMapper;
 import com.bot.yiyi.mapper.UserMapper;
 import com.bot.yiyi.utils.LimitUtil;
 import com.mikuac.shiro.core.Bot;
-import com.mikuac.shiro.core.BotPlugin;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -19,13 +19,13 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.bot.yiyi.Pojo.AtBot.AT_BOT;
 
 @Component
-public class RegisterPlugin extends BotPlugin {
+@Slf4j
+public class RegisterPlugin extends BasePlugin {
 
     @Autowired
     private UserMapper usersMapper;
@@ -47,15 +47,16 @@ public class RegisterPlugin extends BotPlugin {
 
     @Override
     public int onAnyMessage(Bot bot, AnyMessageEvent event) {
-        // 推荐用日志替代System.out.println
-        System.out.println(event.getMessage());
+        log.info(event.getMessage());
 
         User user = usersMapper.selectUser(event.getUserId());
         if (user == null) {
             usersMapper.insertUser(event.getUserId());
         }
-
         String msg = event.getMessage();
+        if (limitUtil.isBlack(event.getUserId())) {
+            return returnType.BLOCK(event.getMessageId());
+        }
         if (PATTERN_CONTACT_OWNER.matcher(msg).find()) {
             String feedback = msg.replaceFirst("联系主人", "").replaceFirst(AT_BOT, "");
             for (Long ownerQQ : botConfig.getOwnerQQ()) {
@@ -65,14 +66,9 @@ public class RegisterPlugin extends BotPlugin {
             bot.sendPrivateMsg(event.getUserId(), "反馈已经给到主人啦!", false);
             return returnType.IGNORE_FALSE(event.getMessageId());
         }
-
         if (SERVER_SET.contains(msg)) {
             limitUtil.isLimitMsg(bot, event);
             return returnType.IGNORE_FALSE(event.getMessageId());
-        }
-
-        if (limitUtil.isBlack(event.getUserId())) {
-            return returnType.BLOCK(event.getMessageId());
         }
         return returnType.IGNORE_TRUE(event.getMessageId());
     }
