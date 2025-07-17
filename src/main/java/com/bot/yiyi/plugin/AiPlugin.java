@@ -107,11 +107,17 @@ public class AiPlugin extends BotPlugin {
         }
 
         if (msg.contains("切换模式群聊")) {
+            if (!isAdmin(bot, event, aiType)) {
+                return returnType.BLOCK(event.getMessageId());
+            }
             aiMapper.updateAiType(0, groupId);
             bot.sendGroupMsg(groupId, "已切换为群聊模式。", true);
             return returnType.BLOCK(event.getMessageId());
         }
         if (msg.contains("切换模式个人")) {
+            if (!isAdmin(bot, event, aiType)) {
+                return returnType.BLOCK(event.getMessageId());
+            }
             aiMapper.updateAiType(1, groupId);
             bot.sendGroupMsg(groupId, "已切换为个人模式。", true);
             return returnType.BLOCK(event.getMessageId());
@@ -131,9 +137,11 @@ public class AiPlugin extends BotPlugin {
     private int handleRoleCommand(Bot bot, MessageEvent event, boolean isGroup, int aiType, int messageId) {
         String msg = event.getMessage();
         long id = isGroup ? ((GroupMessageEvent) event).getGroupId() : event.getUserId();
-
         for (Map.Entry<String, Integer> entry : ROLE_MAP.entrySet()) {
             if (msg.contains("切换角色" + entry.getKey())) {
+                if (isAdmin(bot, event, aiType)) {
+                    return returnType.BLOCK(messageId);
+                }
                 if (isGroup && aiType == 0) aiMapper.updateRole(id, entry.getValue());
                 else aiMapper.updateUserRole(event.getUserId(), entry.getValue());
 
@@ -156,17 +164,15 @@ public class AiPlugin extends BotPlugin {
 
     private int handleChatMessage(Bot bot, long sessionId, String msg, boolean isGroup, int replyId) {
         ParsedMessage parsed = parseMessage(msg);
-        int roleType = aiMapper.selectUserRole(sessionId);
+        int roleType = isGroup ? aiMapper.selectRole(sessionId) : aiMapper.selectUserRole(sessionId);
         updateRoleById(roleType);
 
         Mono<String> context = getContext(parsed.text, sessionId);
-        if (context != null) {
-            context.subscribe(s -> {
-                String message = isGroup ? MsgUtils.builder().reply(replyId).at(sessionId).text(s).build() : s;
-                if (isGroup) bot.sendGroupMsg(sessionId, message, false);
-                else bot.sendPrivateMsg(sessionId, message, false);
-            });
-        }
+        context.subscribe(s -> {
+            String message = isGroup ? MsgUtils.builder().reply(replyId).at(sessionId).text(s).build() : s;
+            if (isGroup) bot.sendGroupMsg(sessionId, message, false);
+            else bot.sendPrivateMsg(sessionId, message, false);
+        });
         return returnType.BLOCK(replyId);
     }
 
@@ -219,9 +225,22 @@ public class AiPlugin extends BotPlugin {
     }
 
     private void updateRoleById(int roleType) {
-        Role[] roles = Role.values();
-        if (roleType >= 0 && roleType < roles.length) {
-            updateRole(roles[roleType]);
+        switch (roleType) {
+            case 0 -> updateRole(Role.DEFAULT);
+            case 1 -> updateRole(Role.WIFE);
+            case 2 -> updateRole(Role.MAID);
+            case 3 -> updateRole(Role.SUCCUBUS);
+            case 4 -> updateRole(Role.ATTACK);
+            case 5 -> updateRole(Role.GIRL);
+            case 6 -> updateRole(Role.TSUNDERE_CAT);
+            case 7 -> updateRole(Role.CAT_GIRL);
+            case 8 -> updateRole(Role.YANDERE_WIFE);
+            case 9 -> updateRole(Role.YANDERE_SENIOR);
+            case 10 -> updateRole(Role.FEMALE_IMP);
+            case 11 -> updateRole(Role.KAFKA);
+            case 12 -> updateRole(Role.ELYSIA);
+            case 13 -> updateRole(Role.SPARKLE);
+            case 14 -> updateRole(Role.DAUGHTER);
         }
     }
 
@@ -236,5 +255,13 @@ public class AiPlugin extends BotPlugin {
         Flux<String> content = chatClient.prompt(history).user(message).stream().content();
         return content.collectList().map(list -> String.join(" ", list).replaceAll("\\s*", ""))
                 .doOnNext(msg -> redisConversationService.addAssistantMessage(sessionId, msg));
+    }
+
+    private boolean isAdmin(Bot bot, MessageEvent event, int aiType) {
+        if (aiType == 0) {
+            String role = bot.getGroupMemberInfo(((GroupMessageEvent) event).getGroupId(), event.getUserId(), true).getData().getRole();
+            return botConfig.isOwnerQQ(event.getUserId()) || role.equals("owner") || role.equals("admin");
+        }
+        return false;
     }
 }

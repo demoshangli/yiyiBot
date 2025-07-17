@@ -44,7 +44,7 @@ public class ResponsivePlugin extends BotPlugin {
 
         event.setMessage(AtUtil.parseCQCode(event.getMessage()));
 
-        if (handleAction(bot, event, "抱抱", "Embrace", 20, 120, TimeUnit.MINUTES)) {
+        if (handleAction(bot, event, "抱抱", "Embrace:", 20, 120, TimeUnit.MINUTES)) {
             return returnType.IGNORE_FALSE(event.getMessageId());
         }
 
