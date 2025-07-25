@@ -3,6 +3,7 @@ package com.bot.yiyi.plugin;
 import com.bot.yiyi.Pojo.ReturnType;
 import com.bot.yiyi.Pojo.Role;
 import com.bot.yiyi.config.AIConfig;
+import com.bot.yiyi.config.BotConfig;
 import com.bot.yiyi.mapper.AIMapper;
 import com.bot.yiyi.utils.RedisConversationService;
 import com.mikuac.shiro.common.utils.MsgUtils;
@@ -25,6 +26,7 @@ import static com.bot.yiyi.Pojo.AtBot.AT_BOT;
 @Component
 public class HumanPlugin extends BasePlugin {
 
+    private final String PLUGIN_NAME = "HumanPlugin";
     @Autowired
     private RedisConversationService redisConversationService;
     @Autowired
@@ -39,6 +41,7 @@ public class HumanPlugin extends BasePlugin {
 
     private ChatClient chatClient;
     private final ChatClient.Builder builder;
+    private BotConfig botConfig;
 
     public HumanPlugin(ChatClient chatClient, ChatClient.Builder builder) {
         this.builder = builder;
@@ -48,6 +51,9 @@ public class HumanPlugin extends BasePlugin {
 
     @Override
     public int onGroupMessage(Bot bot, GroupMessageEvent event) {
+
+        if (shouldIgnore(event, PLUGIN_NAME)) return MESSAGE_IGNORE;
+
         String msg = event.getMessage();
         long groupId = event.getGroupId();
         long userId = event.getUserId();
@@ -55,28 +61,33 @@ public class HumanPlugin extends BasePlugin {
 
         if (!msg.contains(AT_BOT)) {
             // 非@机器人的消息只处理特定情况
-            if (returnType.getMatch(messageId) && aiMapper.selectHumanState(groupId) != 0) {
+            if (returnType.getMatch(messageId)) {
                 return handleAIResponse(bot, event);
             }
-            return returnType.IGNORE_TRUE(messageId);
+            return MESSAGE_IGNORE;
         }
 
         // @机器人的消息，拆分指令处理
-        if (msg.contains("开启伪人模式")) {
-            aiMapper.updateHumanState(1, groupId);
-            sendGroupAt(bot, groupId, userId, "已开启伪人模式");
+        if (botConfig.isGroupAdmin(event, bot)) {
+            if (msg.contains("开启伪人模式")) {
+                aiMapper.updateHumanState(1, groupId);
+                sendGroupAt(bot, groupId, userId, "已开启伪人模式");
+                return returnType.IGNORE_FALSE(messageId);
+            }
+            if (msg.contains("关闭伪人模式")) {
+                aiMapper.updateHumanState(0, groupId);
+                sendGroupAt(bot, groupId, userId, "已关闭伪人模式");
+                return returnType.IGNORE_FALSE(messageId);
+            }
+            if (msg.contains("设置伪人概率")) {
+                return handleSetProbability(bot, event);
+            }
+        } else {
+            sendGroupAt(bot, groupId, userId, "只有群主和管理员可以设置哦~");
             return returnType.IGNORE_FALSE(messageId);
-        }
-        if (msg.contains("关闭伪人模式")) {
-            aiMapper.updateHumanState(0, groupId);
-            sendGroupAt(bot, groupId, userId, "已关闭伪人模式");
-            return returnType.IGNORE_FALSE(messageId);
-        }
-        if (msg.contains("设置伪人概率")) {
-            return handleSetProbability(bot, event);
         }
 
-        return returnType.IGNORE_TRUE(messageId);
+        return MESSAGE_IGNORE;
     }
 
     private int handleSetProbability(Bot bot, GroupMessageEvent event) {
@@ -160,7 +171,7 @@ public class HumanPlugin extends BasePlugin {
                     System.err.println("AI回复异常: " + error.getMessage());
                 });
 
-        return returnType.IGNORE_FALSE(messageId);
+        return MESSAGE_IGNORE;
     }
 
     private static boolean isHit(int percent) {

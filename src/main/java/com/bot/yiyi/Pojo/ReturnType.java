@@ -21,7 +21,7 @@ public class ReturnType extends BotPlugin {
     }
 
     public int IGNORE_FALSE(int msgId) {
-        redisTemplate.opsForValue().set("AIMsg:" + msgId, false);
+        redisTemplate.delete("AIMsg:" + msgId);
         return MESSAGE_IGNORE;
     }
 

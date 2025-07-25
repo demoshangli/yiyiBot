@@ -19,8 +19,6 @@ public interface AIMapper {
 
     int selectPro(Long groupId);
 
-    int selectHumanState(Long groupId);
-
     void updateHumanState(@Param("state") int state, @Param("groupId") Long groupId);
 
     void updatePro(@Param("pro") int pro, @Param("groupId") Long groupId);

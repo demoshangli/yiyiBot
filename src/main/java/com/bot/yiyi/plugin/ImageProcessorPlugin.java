@@ -23,6 +23,9 @@ import javax.imageio.ImageIO;
 
 @Component
 public class ImageProcessorPlugin extends BasePlugin {
+
+    private final String PLUGIN_NAME = "GamePlugin";
+
     @Autowired
     private ReturnType returnType;
     private static final List<String> el1 = Arrays.asList("废墟", "深海", "反应堆", "学园", "腐烂", "东京", "三维", "四次元", "少管所", "流星", "闪光", "南极", "消极", "幽浮", "网路", "暗狱", "离子态", "液态", "黑色", "抱抱", "暴力", "垃圾", "社会", "残暴", "残酷", "工口", "戮尸", "原味", "毛茸茸", "香香", "霹雳", "午夜", "美工刀", "爆浆", "机关枪", "无响应", "手术台", "麻风病", "虚拟", "速冻", "智能", "2000", "甜味", "华丽", "反社会", "玛利亚", "无", "梦之", "蔷薇", "无政府", "酷酷", "西伯利亚", "人造", "法外", "追杀", "通缉", "女子", "微型", "男子", "超", "毁灭", "大型", "绝望", "阴间", "死亡", "坟场", "高科技", "奇妙", "魔法", "极限", "社会主义", "无聊");
@@ -33,6 +36,9 @@ public class ImageProcessorPlugin extends BasePlugin {
 
     @Override
     public int onGroupMessage(Bot bot, GroupMessageEvent event) {
+
+        if (shouldIgnore(event, PLUGIN_NAME)) return MESSAGE_IGNORE;
+
         if (event.getMessage().equals("亚名")) {
             processAndSendImage("https://q1.qlogo.cn/g?b=qq&nk=" + event.getUserId() + "&s=640", bot, event);
             return returnType.IGNORE_FALSE(event.getMessageId());

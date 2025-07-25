@@ -7,6 +7,7 @@ import com.bot.yiyi.mapper.UserMapper;
 import com.bot.yiyi.utils.LimitUtil;
 import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.core.Bot;
+import com.mikuac.shiro.dto.action.response.GroupMemberInfoResp;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -21,6 +22,7 @@ import static com.bot.yiyi.utils.OperationUtils.luckyDraw;
 @Component
 public class MoneyPlugin extends BasePlugin {
 
+    private final String PLUGIN_NAME = "MoneyPlugin";
     @Autowired
     private MoneyMapper moneyMapper;
     @Autowired
@@ -44,14 +46,13 @@ public class MoneyPlugin extends BasePlugin {
 
     @Override
     public int onGroupMessage(Bot bot, GroupMessageEvent event) {
+
+        if (shouldIgnore(event, PLUGIN_NAME)) return MESSAGE_IGNORE;
+
         long groupId = event.getGroupId();
         long userId = event.getUserId();
         int messageId = event.getMessageId();
         String msg = event.getMessage().trim();
-
-        if (groupId == 176282339L || limitUtil.isLimit(userId)) {
-            return returnType.IGNORE_TRUE(messageId);
-        }
 
         User user = usersMapper.selectUser(userId);
 
@@ -65,16 +66,16 @@ public class MoneyPlugin extends BasePlugin {
             return handleLottery(bot, event, user);
         }
         if (RICH_LIST_CMDS.contains(msg)) {
-            return sendRichOrPoorList(bot, groupId, userId, moneyMapper.selectMAX(), messageId, false);
+            return sendRichOrPoorList(bot, groupId, userId, moneyMapper.selectMAX(), messageId, false, true);
         }
         if (POOR_LIST_CMDS.contains(msg)) {
-            return sendRichOrPoorList(bot, groupId, userId, moneyMapper.selectMIN(), messageId, false);
+            return sendRichOrPoorList(bot, groupId, userId, moneyMapper.selectMIN(), messageId, false, false);
         }
         if (GROUP_RICH_LIST_CMDS.contains(msg)) {
-            return sendRichOrPoorList(bot, groupId, userId, moneyMapper.selectGroupMAX(groupId), messageId, true);
+            return sendRichOrPoorList(bot, groupId, userId, moneyMapper.selectGroupMAX(groupId), messageId, true, true);
         }
         if (GROUP_POOR_LIST_CMDS.contains(msg)) {
-            return sendRichOrPoorList(bot, groupId, userId, moneyMapper.selectGroupMIN(groupId), messageId, true);
+            return sendRichOrPoorList(bot, groupId, userId, moneyMapper.selectGroupMIN(groupId), messageId, true, false);
         }
 
         Matcher mGift = PATTERN_GIFT.matcher(msg);
@@ -126,13 +127,14 @@ public class MoneyPlugin extends BasePlugin {
         return sendMsg(bot, event.getGroupId(), userId, "恭喜你抽中了 积分" + key + ",你当前的积分为" + result.get(key), messageId);
     }
 
-    private int sendRichOrPoorList(Bot bot, long groupId, long userId, List<User> userList, int messageId, boolean isGroupList) {
-        StringBuilder sb = new StringBuilder(isGroupList ? "富豪榜" : "负豪榜");
+    private int sendRichOrPoorList(Bot bot, long groupId, long userId, List<User> userList, int messageId, boolean isGroupList, boolean isRichList) {
+        StringBuilder sb = new StringBuilder(isRichList ? "富豪榜" : "负豪榜");
         int i = 1;
         for (User u : userList) {
             String name = isGroupList
                     ? bot.getGroupMemberInfo(groupId, u.getId(), true).getData().getCard()
                     : bot.getStrangerInfo(u.getId(), true).getData().getNickname();
+            if (name == null || name.isEmpty()) name = bot.getStrangerInfo(u.getId(), true).getData().getNickname();;
             if (name == null || name.isEmpty()) name = "匿名";
             sb.append("\n").append(i++).append(". ").append(name).append(" ").append(u.getMoney());
         }

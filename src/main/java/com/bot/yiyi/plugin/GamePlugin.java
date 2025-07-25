@@ -21,6 +21,8 @@ import static com.bot.yiyi.Pojo.AtBot.AT_BOT;
 @Component
 public class GamePlugin extends BasePlugin {
 
+    private final String PLUGIN_NAME = "GamePlugin";
+
     @Autowired
     private LimitUtil limitUtil;
 
@@ -36,19 +38,17 @@ public class GamePlugin extends BasePlugin {
     // 每条群消息会触发此方法
     @Override
     public int onGroupMessage(Bot bot, GroupMessageEvent event) {
+
+        if (shouldIgnore(event, PLUGIN_NAME)) return MESSAGE_IGNORE;
+
         long groupId = event.getGroupId();
         long userId = event.getUserId();
         int messageId = event.getMessageId();
         String message = event.getMessage();
 
-        // 指定群不处理
-        if (groupId == 176282339L) {
-            return returnType.IGNORE_TRUE(messageId);
-        }
-
         // 判断是否触发限流
         if (limitUtil.isLimit(userId)) {
-            return returnType.IGNORE_TRUE(messageId);
+            return MESSAGE_IGNORE;
         }
 
         // 游戏触发关键词

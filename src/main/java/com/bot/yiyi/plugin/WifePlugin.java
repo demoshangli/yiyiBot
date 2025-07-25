@@ -27,7 +27,9 @@ import static com.bot.yiyi.Pojo.AtBot.AT_BOT;
 
 
 @Component
-public class WifePlugin extends BasePlugin {
+public class  WifePlugin extends BasePlugin {
+
+    private final String PLUGIN_NAME = "WifePlugin";
 
     @Autowired
     private WifeMapper wifeMapper;
@@ -45,11 +47,11 @@ public class WifePlugin extends BasePlugin {
 
     @Override
     public int onGroupMessage(Bot bot, GroupMessageEvent event) {
-        if (event.getGroupId() == 176282339L) {
-            return returnType.IGNORE_TRUE(event.getMessageId());
-        }
+
+        if (shouldIgnore(event, PLUGIN_NAME)) return MESSAGE_IGNORE;
+
         if (limitUtil.isLimit(event.getUserId()))
-            return returnType.IGNORE_TRUE(event.getMessageId());
+            return MESSAGE_IGNORE;
         event.setMessage(AtUtil.parseCQCode(event.getMessage()));
         Set<String> marrySet = new HashSet<>(Arrays.asList("娶群友", "娶老婆", AT_BOT + "娶群友", AT_BOT + "娶老婆"));
         if (marrySet.contains(event.getMessage())) {

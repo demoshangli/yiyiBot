@@ -12,6 +12,8 @@ import java.util.*;
 @Component
 public class SoundPlugin extends BasePlugin {
 
+    private final String PLUGIN_NAME = "GamePlugin";
+
     @Autowired
     private ReturnType returnType;
 
@@ -38,6 +40,9 @@ public class SoundPlugin extends BasePlugin {
 
     @Override
     public int onAnyMessage(Bot bot, AnyMessageEvent event) {
+
+        if (shouldIgnore(event, PLUGIN_NAME)) return MESSAGE_IGNORE;
+
         String msg = event.getMessage();
         if (msg == null || msg.isEmpty()) {
             return MESSAGE_IGNORE;

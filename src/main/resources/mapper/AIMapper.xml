@@ -29,7 +29,4 @@
     <select id="selectPro" resultType="java.lang.Integer">
         select msg_pro from group_info where group_id = #{groupId}
     </select>
-    <select id="selectHumanState" resultType="java.lang.Integer">
-        select human_state from group_info where group_id = #{groupId}
-    </select>
 </mapper>

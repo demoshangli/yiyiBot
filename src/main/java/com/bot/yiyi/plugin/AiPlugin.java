@@ -31,6 +31,7 @@ import static com.bot.yiyi.Pojo.AtBot.AT_BOT;
 @Component
 public class AiPlugin extends BasePlugin {
 
+    private final String PLUGIN_NAME = "AiPlugin";
     private final ChatClient.Builder builder;
     private ChatClient chatClient;
 
@@ -69,7 +70,7 @@ public class AiPlugin extends BasePlugin {
     @Override
     public int onPrivateMessage(Bot bot, PrivateMessageEvent event) {
         if (!returnType.getMatch(event.getMessageId())) return returnType.BLOCK(event.getMessageId());
-        String msg = event.getMessage();
+        String msg = event.getMessage().replaceAll("\\s+", "");;
 
         if (msg.equals("清空记忆")) {
             redisConversationService.clearHistory(event.getUserId());
@@ -80,15 +81,16 @@ public class AiPlugin extends BasePlugin {
         if (msg.contains("切换角色") || msg.contains("当前角色")) {
             return handleRoleCommand(bot, event, false, 1, event.getMessageId());
         }
-
-        return handleChatMessage(bot, 1, event.getUserId(), msg, false, event.getMessageId(), 1);
+        if (returnType.getMatch(event.getMessageId())) {
+            return handleChatMessage(bot, 1, event.getUserId(), msg, false, event.getMessageId(), 1);
+        }
+        return MESSAGE_BLOCK;
     }
 
     @Override
     public int onGroupMessage(Bot bot, GroupMessageEvent event) {
-        if (event.getGroupId() == 176282339L) return returnType.BLOCK(event.getMessageId());
 
-        if (!AtUtil.isAt(bot.getLoginInfo().getData(), event)) return returnType.BLOCK(event.getMessageId());
+        if (shouldIgnore(event, PLUGIN_NAME)) return MESSAGE_IGNORE;
 
         String msg = event.getMessage();
         long groupId = event.getGroupId();
@@ -100,6 +102,8 @@ public class AiPlugin extends BasePlugin {
             bot.sendGroupMsg(groupId, "记忆已清空。", true);
             return returnType.BLOCK(event.getMessageId());
         }
+
+        msg = msg.replaceAll("\\s+", "");
 
         if (msg.contains("切换角色") || msg.contains("当前角色")) {
             return handleRoleCommand(bot, event, true, aiType, event.getMessageId());
@@ -128,6 +132,8 @@ public class AiPlugin extends BasePlugin {
             bot.sendGroupMsg(groupId, "当前模式为" + mode + "模式。", true);
             return returnType.BLOCK(event.getMessageId());
         }
+
+        if (!AtUtil.isAt(bot.getLoginInfo().getData(), event)) return returnType.BLOCK(event.getMessageId());
 
         if (returnType.getMatch(event.getMessageId())) {
             return handleChatMessage(bot, groupId, userId, cleanGroupMessage(bot, event), true, event.getMessageId(), aiType);
@@ -274,8 +280,7 @@ public class AiPlugin extends BasePlugin {
     }
 
     private boolean isAdmin(Bot bot, MessageEvent event) {
-            String role = bot.getGroupMemberInfo(((GroupMessageEvent) event).getGroupId(), event.getUserId(), true).getData().getRole();
-            return botConfig.isOwnerQQ(event.getUserId()) || role.equals("owner") || role.equals("admin");
+        return botConfig.isGroupAdmin(event, bot);
     }
 
 }

@@ -22,6 +22,8 @@ import java.util.regex.Pattern;
 @Component
 public class ResponsivePlugin extends BasePlugin {
 
+    private final String PLUGIN_NAME = "ResponsivePlugin";
+
     @Autowired
     private WifeMapper wifeMapper;
     @Autowired
@@ -37,9 +39,8 @@ public class ResponsivePlugin extends BasePlugin {
 
     @Override
     public int onGroupMessage(Bot bot, GroupMessageEvent event) {
-        if (event.getGroupId() == 176282339L || limitUtil.isLimit(event.getUserId())) {
-            return returnType.IGNORE_TRUE(event.getMessageId());
-        }
+
+        if (shouldIgnore(event, PLUGIN_NAME)) return MESSAGE_IGNORE;
 
         event.setMessage(AtUtil.parseCQCode(event.getMessage()));
 

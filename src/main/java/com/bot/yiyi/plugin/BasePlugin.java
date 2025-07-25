@@ -19,17 +19,9 @@ public abstract class BasePlugin extends BotPlugin {
     /**
      * 判断群聊消息是否应该跳过（群禁用 or 用户禁用）
      */
-    protected boolean shouldIgnore(GroupMessageEvent event) {
+    protected boolean shouldIgnore(GroupMessageEvent event, String pluginName) {
         Long groupId = event.getGroupId();
-        Long userId = event.getUserId();
-
-        Boolean groupSwitch = (Boolean) redisTemplate.opsForValue().get("PluginSwitch:Group:" + groupId);
-        if (groupSwitch != null && !groupSwitch) {
-            return true;
-        }
-
-        Boolean userSwitch = (Boolean) redisTemplate.opsForValue().get("PluginSwitch:User:" + userId);
-        return userSwitch != null && !userSwitch;
+        return Boolean.TRUE.equals(redisTemplate.hasKey("PluginSwitch:" + groupId + ":" + pluginName));
     }
 
     /**

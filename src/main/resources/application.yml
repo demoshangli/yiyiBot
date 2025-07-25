@@ -6,8 +6,8 @@ shiro:
       enable: true
       url: "/ws/yiyi"
   plugin-list:
-    - com.bot.yiyi.plugin.BasePlugin
     - com.bot.yiyi.plugin.RegisterPlugin
+    - com.bot.yiyi.plugin.ModuleTogglePlugin
     - com.bot.yiyi.plugin.OwnerPlugin
     - com.bot.yiyi.plugin.ServerPlugin
     - com.bot.yiyi.plugin.MenuPlugin
@@ -46,5 +46,3 @@ spring:
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.bot.yiyi.pojo
-bot:
-  ownerQQ: 2376539644,2154209138

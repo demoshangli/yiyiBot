@@ -19,26 +19,26 @@ public class MenuPlugin extends BasePlugin {
 
     @Override
     public int onAnyMessage(Bot bot, AnyMessageEvent event) {
-        if (event.getGroupId() != null && event.getGroupId() == 176282339L) {
-            return returnType.IGNORE_TRUE(event.getMessageId());
-        }
         Set<String> gameSet = new HashSet<>(Arrays.asList("菜单", AT_BOT + "菜单"));
         if (gameSet.contains(event.getMessage())) {
             List<String> menu = new ArrayList<>();
             menu.add("依依菜单Ciallo～(∠・ω< )⌒☆");
-            menu.add("发癫文学\n" +
-                            "@依依 —— 依依主动对你发癫。\n" +
-                            "@+发癫 —— 你对@的人发癫。\n" +
-                            "@+发癫+@ —— 指定某人对另一个人发癫。");
-            menu.add("api\n" +
+            menu.add("开关\n" +
+                    "开启/关闭 + 模块名称\n" +
+                    "依依开机/关机"
+            );
+            menu.add("游戏模块\n" +
                     "随机古诗 —— 随机一句古诗。\n" +
                     "随机一言 —— 随机一句鸡汤。\n" +
                     "随机语录 —— 随机一句社会语录。\n" +
                     "毒鸡汤 —— 随机一句毒鸡汤。\n" +
                     "舔狗日记 —— 随机舔狗日记。\n" +
                     "亚名 —— 高科技亚文化取名机。\n" +
-                    "曼波 —— 有小马的语音包哦。");
-            menu.add("积分系统\n" +
+                    "曼波 —— 有小马的语音包哦。\n" +
+                    "@依依 —— 依依主动对你发癫。\n" +
+                    "@+发癫 —— 你对@的人发癫。\n" +
+                    "@+发癫+@ —— 指定某人对另一个人发癫。");
+            menu.add("积分模块\n" +
                             "打卡 / 签到 —— 每日签到领取积分。\n" +
                             "积分抽奖 / 积分赌狗 —— 使用积分进行抽奖或赌积分。\n" +
                             "我的积分 / 积分 —— 查询自己的当前积分。\n" +
@@ -49,7 +49,7 @@ public class MenuPlugin extends BasePlugin {
                             "负豪榜 —— 查看全群积分最低的用户。\n" +
                             "群富豪榜 —— 查看群内积分前几名的用户。\n" +
                             "群负豪榜 —— 查看群内积分最低的用户。");
-            menu.add("结婚系统\n" +
+            menu.add("结婚模块\n" +
                             "娶群友 / 娶老婆 —— 随机迎娶某人。\n" +
                             "嫁群友 / 嫁老公 —— 随机嫁给某人。\n" +
                             "娶+@ —— 向指定用户求婚。\n" +
@@ -60,11 +60,11 @@ public class MenuPlugin extends BasePlugin {
                             "抢老公+@你要抢的人 —— 抢走别人的老公。\n" +
                             "我的老婆 / 我的老公 —— 查询自己的配偶信息。\n" +
                             "闹离婚 / 闹分手 —— 解除关系。");
-            menu.add("好感度系统\n" +
+            menu.add("好感度模块\n" +
                     "抱抱+@ —— 抱抱你的伴侣，当然你也可以抱别人。\n" +
                     "亲亲+@ —— 亲亲你的伴侣，当然你也可以亲别人。\n" +
                     "给零花钱 —— 可以给你的伴侣零花钱，但是不能给别人，依依不希望你变成散财童子。");
-            menu.add("智能对话\n" +
+            menu.add("AI对话模块\n" +
                             "@依依 就可以和依依对话啦！\n" +
                             "@依依清空记忆 —— 清空对话记忆\n" +
                             "@依依+切换模式个人/群聊 切换ai模式\n" +
@@ -79,8 +79,7 @@ public class MenuPlugin extends BasePlugin {
                             "默认 贴吧老哥 卡芙卡 爱莉希雅 花火\n" +
                             "ps:只有群主和管理员才可以切换角色哦~\n" +
                             "pps:切换角色会自动清空记忆哦~\n");
-            menu.add("伪人功能\n" +
-                    "@依依+开启/关闭伪人模式 开启或关闭伪人模式\n" +
+            menu.add("伪人模块\n" +
                     "@依依+设置伪人概率1-100 设置伪人模式回复概率");
             menu.add("如发现bug或提出建议，请使用 联系主人+内容 进行反馈");
             if (event.getGroupId() != null)

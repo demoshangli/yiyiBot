@@ -1,6 +1,7 @@
 package com.bot.yiyi.utils;
 
 import com.bot.yiyi.config.BotConfig;
+import com.bot.yiyi.mapper.UserMapper;
 import com.mikuac.shiro.common.utils.MsgUtils;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
@@ -15,12 +16,14 @@ public class LimitUtil {
     private RedisTemplate redisTemplate;
     @Autowired
     private BotConfig botConfig;
+    @Autowired
+    private UserMapper userMapper;
 
     public Boolean isBlack(Long userId) {
-        if (botConfig.isOwnerQQ(userId)) {
+        if (botConfig.isAdmin(userId)) {
             return false;
         }
-        return redisTemplate.hasKey("black:" + userId);
+        return userMapper.selectUserBlack(userId) == 1;
     }
 
     public void isLimitMsg(Bot bot, GroupMessageEvent event) {
@@ -42,7 +45,7 @@ public class LimitUtil {
     }
 
     public Boolean isLimit(Long userId) {
-        if (botConfig.isOwnerQQ(userId)) {
+        if (botConfig.isAdmin(userId)) {
             return false;
         }
         if (redisTemplate.hasKey("work:SewingMachine" + userId)) {
@@ -52,5 +55,12 @@ public class LimitUtil {
             return true;
         }
         return false;
+    }
+
+    public boolean isShutdown(Long groupId) {
+        if (groupId == null) {
+            return false;
+        }
+        return userMapper.isShutDown(groupId) == 0;
     }
 }

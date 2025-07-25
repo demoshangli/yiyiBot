@@ -26,4 +26,8 @@ public interface UserMapper {
     List<User> selectAllUser();
 
     void updateDay(@Param("Check") int checkIn, @Param("lotteryTime") int lotteryTime, @Param("money") int money, @Param("userId") Long userId);
+
+    int selectUserBlack(Long userId);
+
+    int isShutDown(Long groupId);
 }

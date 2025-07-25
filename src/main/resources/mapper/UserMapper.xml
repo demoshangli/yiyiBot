@@ -3,13 +3,13 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.bot.yiyi.mapper.UserMapper">
     <insert id="insertUser">
-        insert into user values (#{userId},2000,0,0,0,0)
+        insert into user values (#{userId},2000,0,0,0,0,0)
     </insert>
     <insert id="addGroupUser">
         insert into group_user_info values (0,#{userId},#{groupId})
     </insert>
     <insert id="addGroup">
-        insert into group_info values (0,#{groupId},0,0,0,0)
+        insert into group_info values (0,#{groupId},0,0,0,1)
     </insert>
     <update id="updateDay">
         update user set is_check_in = #{Check}, bank = #{money}, lottery_time = #{lotteryTime} where id = #{userId}
@@ -28,5 +28,11 @@
     </select>
     <select id="selectAllUser" resultType="com.bot.yiyi.Pojo.User">
         select id, money, is_check_in as isCheckIn, bank, lottery_time as lotteryTime from user
+    </select>
+    <select id="selectUserBlack" resultType="java.lang.Integer">
+        select is_black from user where id = #{userId}
+    </select>
+    <select id="isShutDown" resultType="java.lang.Integer">
+        select bot_state from group_info where group_id = #{groupId}
     </select>
 </mapper>

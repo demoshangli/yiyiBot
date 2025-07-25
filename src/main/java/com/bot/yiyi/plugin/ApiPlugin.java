@@ -19,15 +19,15 @@ import static com.bot.yiyi.Pojo.AtBot.AT_BOT;
 @Component
 public class ApiPlugin extends BasePlugin {
 
+    private final String PLUGIN_NAME = "GamePlugin";
+
     @Autowired
     private ReturnType returnType;
 
     @Override
     public int onGroupMessage(Bot bot, GroupMessageEvent event) {
-        // 忽略指定群
-        if (event.getGroupId() == 176282339L) {
-            return returnType.IGNORE_TRUE(event.getMessageId());
-        }
+
+        if (shouldIgnore(event, PLUGIN_NAME)) return MESSAGE_IGNORE;
 
         // 获取登录信息和发送者信息
         LoginInfoResp data = bot.getLoginInfo().getData();
@@ -67,7 +67,7 @@ public class ApiPlugin extends BasePlugin {
                 msgList.add(img);
                 bot.sendGroupForwardMsg(event.getGroupId(), AtUtil.toForward(fromStrangerInfo.getNickname(), fromStrangerInfo.getUserId(), msgList));
                 if (qqList.get(0) != bot.getSelfId() && qqList.get(1) != bot.getSelfId())
-                    return returnType.IGNORE_TRUE(event.getMessageId());
+                    return MESSAGE_IGNORE;
                 else
                     return returnType.IGNORE_FALSE(event.getMessageId());
             } else {

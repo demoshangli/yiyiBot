@@ -9,19 +9,18 @@ import com.bot.yiyi.utils.LimitUtil;
 import com.mikuac.shiro.core.Bot;
 import com.mikuac.shiro.dto.event.message.AnyMessageEvent;
 import com.mikuac.shiro.dto.event.message.GroupMessageEvent;
+import com.mikuac.shiro.dto.event.message.PrivateMessageEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static com.bot.yiyi.Pojo.AtBot.AT_BOT;
+import static com.bot.yiyi.Pojo.AtBot.PATTERN_AT_BOT;
 
 @Component
 @Slf4j
@@ -42,8 +41,23 @@ public class RegisterPlugin extends BasePlugin {
 
     // 预编译正则表达式
     private static final Pattern PATTERN_CONTACT_OWNER = Pattern.compile("联系主人[：:\\-]?\\s*[\\u4e00-\\u9fa5A-Za-z0-9]{0,100}");
-
+    private static final Pattern PATTERN_START = Pattern.compile("(" + PATTERN_AT_BOT + "开机)|(^依依开机$)");
     private static final Set<String> SERVER_SET = new HashSet<>(Arrays.asList("状态", AT_BOT + "状态"));
+
+    @Override
+    public int onPrivateMessage(Bot bot, PrivateMessageEvent event) {
+        String msg = event.getMessage();
+        if (PATTERN_CONTACT_OWNER.matcher(msg).find()) {
+            String feedback = msg.replaceFirst("联系主人", "").replaceFirst(AT_BOT, "");
+            for (Map<String, Object> ownerQQ : botConfig.getOwnerQQ()) {
+                String nick = bot.getStrangerInfo(event.getUserId(), true).getData().getNickname();
+                bot.sendPrivateMsg((Long) ownerQQ.get("id"), "收到" + event.getUserId() + "(" + nick + ")" + "的反馈\n" + feedback, false);
+            }
+            bot.sendPrivateMsg(event.getUserId(), "反馈已经给到主人啦!", false);
+            return returnType.IGNORE_FALSE(event.getMessageId());
+        }
+        return returnType.IGNORE_TRUE(event.getMessageId());
+    }
 
     @Override
     public int onAnyMessage(Bot bot, AnyMessageEvent event) {
@@ -57,18 +71,12 @@ public class RegisterPlugin extends BasePlugin {
         if (limitUtil.isBlack(event.getUserId())) {
             return returnType.BLOCK(event.getMessageId());
         }
-        if (PATTERN_CONTACT_OWNER.matcher(msg).find()) {
-            String feedback = msg.replaceFirst("联系主人", "").replaceFirst(AT_BOT, "");
-            for (Long ownerQQ : botConfig.getOwnerQQ()) {
-                String nick = bot.getStrangerInfo(event.getUserId(), true).getData().getNickname();
-                bot.sendPrivateMsg(ownerQQ, "收到" + event.getUserId() + "(" + nick + ")" + "的反馈\n" + feedback, false);
-            }
-            bot.sendPrivateMsg(event.getUserId(), "反馈已经给到主人啦!", false);
-            return returnType.IGNORE_FALSE(event.getMessageId());
-        }
         if (SERVER_SET.contains(msg)) {
             limitUtil.isLimitMsg(bot, event);
             return returnType.IGNORE_FALSE(event.getMessageId());
+        }
+        if (limitUtil.isShutdown(event.getGroupId()) && !PATTERN_START.matcher(event.getMessage()).find()) {
+            return returnType.BLOCK(event.getMessageId());
         }
         return returnType.IGNORE_TRUE(event.getMessageId());
     }
@@ -85,11 +93,13 @@ public class RegisterPlugin extends BasePlugin {
         if (usersMapper.selectGroupIsHave(groupId) == null) {
             usersMapper.addGroup(groupId);
         }
-
         if (limitUtil.isBlack(userId)) {
             return returnType.BLOCK(event.getMessageId());
         }
-        return MESSAGE_IGNORE;
+        if (limitUtil.isShutdown(event.getGroupId()) && !PATTERN_START.matcher(event.getMessage()).find()) {
+            return returnType.BLOCK(event.getMessageId());
+        }
+        return returnType.IGNORE_TRUE(event.getMessageId());
     }
 
     // 每天0点执行，为每个用户计算银行积分利息
